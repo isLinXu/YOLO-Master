@@ -1,5 +1,10 @@
 <div align="center">
   <h1>YOLO-MASTER</h1>
+
+
+<p align="left"> <a href="https://huggingface.co/spaces/xx"> <img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue" alt="Hugging Face Spaces"> </a> <a href="https://colab.research.google.com/github/isLinXu/YOLO-Master"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"> </a> <a href="https://arxiv.org/abs/2512.23273"> <img src="https://img.shields.io/badge/arXiv-2512.23273-b31b1b.svg" alt="arXiv"> </a>  <a href="https://github.com/isLinXu/YOLO-Master/releases"> <img src="https://img.shields.io/badge/%F0%9F%93%A6-Model%20Zoo-orange" alt="Model Zoo"> </a> <a href="./LICENSE"> <img src="https://img.shields.io/badge/License-AGPL%203.0-blue.svg" alt="AGPL 3.0"> </a> <a href="https://github.com/ultralytics/ultralytics"> <img src="https://img.shields.io/badge/Ultralytics-YOLO-blue" alt="Ultralytics"> </a> </p>
+
+
   <p align="center">
     YOLO-Master: 
     <b><u>M</u></b>OE-<b><u>A</u></b>ccelerated with 
@@ -7,6 +12,7 @@
     <b><u>E</u></b>nhanced <b><u>R</u></b>eal-time Detection.
   </p>
 </div>
+
 <div align="center">
   <div style="text-align: center; margin-bottom: 8px;">
     <a href="https://github.com/isLinXu" style="text-decoration: none;"><b>Xu Lin</b></a><sup>1*</sup>&nbsp;&nbsp;
@@ -32,24 +38,77 @@
     </div>
   </div>
 </div>
+<br>
 
-<img width="885" height="194" alt="Image" src="https://github.com/user-attachments/assets/6caa1065-af77-4f77-8faf-7551c013dacd" />
+---
 
-## 🚀 Updates (Latest First)
+## 💡 A Humble Beginning (Introduction)
 
-- **2025/12/xx**: arXiv paper published; 
+> **"Exploring the frontiers of Dynamic Intelligence in YOLO."**
+
+This work represents our passionate exploration into the evolution of Real-Time Object Detection (RTOD). To the best of our knowledge, **YOLO-Master is perhaps the first work to deeply integrate Mixture-of-Experts (MoE) with the YOLO architecture on general-purpose datasets.**
+
+Most existing YOLO models rely on static, dense computation—allocating the same computational budget to a simple sky background as they do to a complex, crowded intersection. We believe detection models should be more "adaptive," much like the human visual system. While this initial exploration may not be perfect, it demonstrates the significant potential of **Efficient Sparse MoE (ES-MoE)** in balancing high precision with ultra-low latency. We are committed to continuous iteration and optimization to refine this approach further.
+
+Looking forward, we draw inspiration from the transformative advancements in LLMs and VLMs. We are committed to refining this approach and extending these insights to fundamental vision tasks, with the ultimate goal of tackling more ambitious frontiers like Open-Vocabulary Detection and Open-Set Segmentation.
 
 <details>
   <summary>
-  <font size="+1">Abstract</font>
+  <font size="+1"><b>Abstract</b></font>
   </summary>
 Existing Real-Time Object Detection (RTOD) methods commonly adopt YOLO-like architectures for their favorable trade-off between accuracy and speed. However, these models rely on static dense computation that applies uniform processing to all inputs, misallocating representational capacity and computational resources such as over-allocating on trivial scenes while under-serving complex ones. This mismatch results in both computational redundancy and suboptimal detection performance.
-To overcome this limitation, we propose YOLO-Master, a novel YOLO-like framework that introduces instance-conditional adaptive computation for RTOD. This is achieved through an Efficient Sparse Mixture-of-Experts (ES-MoE) block that dynamically allocates computational resources to each input according to its scene complexity. At its core, a lightweight dynamic routing network guides expert specialization during training through a diversity enhancing objective, encouraging complementary expertise among experts. Additionally, the routing network adaptively learns to activate only the most relevant experts, thereby improving detection performance while minimizing computational overhead during inference.
-Comprehensive experiments on five large-scale benchmarks demonstrate the superiority of YOLO-Master. On MS COCO, our model achieves 42.4\% AP with 1.62ms latency, outperforming YOLOv13-N by +0.8\% mAP and 17.8\% faster inference. Notably, the gains are most pronounced on challenging dense scenes, while the model preserves efficiency on typical inputs and maintains real-time inference speed. Code: \href{https://github.com/isLinXu/YOLO-Master}{isLinXu/YOLO-Master}
-</details>
-## 📊 Main Results
 
-<img width="400" alt="Radar chart comparing YOLO models on various datasets" src="https://github.com/user-attachments/assets/743fa632-659b-43b1-accf-f865c8b66754"/>
+To overcome this limitation, we propose YOLO-Master, a novel YOLO-like framework that introduces instance-conditional adaptive computation for RTOD. This is achieved through an Efficient Sparse Mixture-of-Experts (ES-MoE) block that dynamically allocates computational resources to each input according to its scene complexity. At its core, a lightweight dynamic routing network guides expert specialization during training through a diversity enhancing objective, encouraging complementary expertise among experts. Additionally, the routing network adaptively learns to activate only the most relevant experts, thereby improving detection performance while minimizing computational overhead during inference.
+
+Comprehensive experiments on five large-scale benchmarks demonstrate the superiority of YOLO-Master. On MS COCO, our model achieves 42.4\% AP with 1.62ms latency, outperforming YOLOv13-N by +0.8\% mAP and 17.8\% faster inference. Notably, the gains are most pronounced on challenging dense scenes, while the model preserves efficiency on typical inputs and maintains real-time inference speed. Code: [isLinXu/YOLO-Master](https://github.com/isLinXu/YOLO-Master)
+</details>
+
+---
+
+## 🎨 Architecture
+
+<div align="center">
+  <img width="90%" alt="YOLO-Master Architecture" src="https://github.com/user-attachments/assets/6caa1065-af77-4f77-8faf-7551c013dacd" />
+  <p><i>YOLO-Master introduces ES-MoE blocks to achieve "compute-on-demand" via dynamic routing.</i></p>
+</div>
+
+
+## 📖 Table of Contents
+
+- [A Humble Beginning](#-a-humble-beginning-introduction)
+- [Architecture](#-architecture)
+- [Updates](#-updates-latest-first)
+- [Main Results](#-main-results)
+  - [Detection](#detection)
+  - [Segmentation](#segmentation)
+  - [Classification](#classification)
+- [Detection Examples](#-detection-examples)
+- [Supported Tasks](#-supported-tasks)
+- [Quick Start](#-quick-start)
+  - [Installation](#installation)
+  - [Validation](#validation)
+  - [Training](#training)
+  - [Inference](#inference)
+  - [Export](#export)
+  - [Gradio Demo](#gradio-demo)
+- [Community & Contributing](#-community--contributing)
+- [License](#-license)
+- [Acknowledgements](#-acknowledgements)
+- [Citation](#-citation)
+
+
+
+## 🚀 Updates (Latest First)
+
+- **2025/12/30**: arXiv paper published.
+
+
+## 📊 Main Results
+### Detection
+<div align="center">
+  <img width="450" alt="Radar chart comparing YOLO models on various datasets" src="https://github.com/user-attachments/assets/743fa632-659b-43b1-accf-f865c8b66754"/>
+</div>
+
 
 <div align="center">
   <p><b>Table 1. Comparison with state-of-the-art Nano-scale detectors across five benchmarks.</b></p>
@@ -129,98 +188,163 @@ Comprehensive experiments on five large-scale benchmarks demonstrate the superio
   </table>
 </div>
 
+### Segmentation
 
+| **Model**             | **Size** | **mAPbox (%)** | **mAPmask (%)** | **Gain (mAPmask)** |
+| --------------------- | -------- | -------------- | --------------- | ------------------ |
+| YOLOv11-seg-N         | 640      | 38.9           | 32.0            | -                  |
+| YOLOv12-seg-N         | 640      | 39.9           | 32.8            | Baseline           |
+| **YOLO-Master-seg-N** | **640**  | **42.9**       | **35.6**        | **+2.8%** 🚀        |
 
+### Classification
+
+| **Model**             | **Dataset**  | **Input Size** | **Top-1 Acc (%)** | **Top-5 Acc (%)** | **Comparison**    |
+| --------------------- | ------------ | -------------- | ----------------- | ----------------- | ----------------- |
+| YOLOv11-cls-N         | ImageNet     | 224            | 70.0              | 89.4              | Baseline          |
+| YOLOv12-cls-N         | ImageNet     | 224            | 71.7              | 90.5              | +1.7% Top-1       |
+| **YOLO-Master-cls-N** | **ImageNet** | **224**        | **76.6**          | **93.4**          | **+4.9% Top-1** 🔥 |
 
 ## 🖼️ Detection Examples
 
-<img width="1416" height="856" alt="Image" src="https://github.com/user-attachments/assets/0e1fbe4a-34e7-489e-b936-6d121ede5cf6" />
+<div align="center">
+  <img width="1416" height="856" alt="Detection Examples" src="https://github.com/user-attachments/assets/0e1fbe4a-34e7-489e-b936-6d121ede5cf6" /> </div>
+<table border="0"> <tr> <td align="center" style="font-weight: bold; background-color: #f6f8fa;"> <b>Detection</b> </td> <td width="45%"> <img src="https://github.com/user-attachments/assets/db350acd-1d91-4be6-96b2-6bdf8aac57e8" alt="Detection 1" style="width:100%; display:block; border-radius:4px;"> </td> <td width="45%"> <img src="https://github.com/user-attachments/assets/b6c80dbd-120e-428b-8d26-ea2b38a40b47" alt="Detection 2" style="width:100%; display:block; border-radius:4px;"> </td> </tr> <tr> <td align="center" style="font-weight: bold; background-color: #f6f8fa;"> <b>Segmentation</b> </td> <td width="45%"> <img src="https://github.com/user-attachments/assets/edb05e3c-cd83-41db-89f8-8ef09fc22798" alt="Segmentation 1" style="width:100%; display:block; border-radius:4px;"> </td> <td width="45%"> <img src="https://github.com/user-attachments/assets/ea138674-d7c7-48fb-b272-3ec211d161bf" alt="Segmentation 2" style="width:100%; display:block; border-radius:4px;"> </td> </tr> </table>
+
+
+
+## 🧩 Supported Tasks
+
+YOLO-Master builds upon the robust Ultralytics framework, inheriting support for various computer vision tasks. While our research primarily focuses on Real-Time Object Detection, the codebase is capable of supporting:
+
+| Task | Status | Description |
+|:-----|:------:|:------------|
+| **Object Detection** | ✅ | Real-time object detection with ES-MoE acceleration. |
+| **Instance Segmentation** | ✅ | Experimental support (inherited from Ultralytics). |
+| **Pose Estimation** | 🚧 | Experimental support (inherited from Ultralytics). |
+| **OBB Detection** | 🚧 | Experimental support (inherited from Ultralytics). |
+| **Classification** | ✅ | Image classification support. |
 
 ## ⚙️ Quick Start
 
 ### Installation
 
-```bash
-# Optional: Install FlashAttention for faster training/inference (CUDA required)
-wget https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.3/flash_attn-2.7.3+cu11torch2.2cxx11abiFALSE-cp311-cp311-linux_x86_64.whl
-pip install flash_attn-*.whl
+<details open>
+<summary><strong>Install via pip (Recommended)</strong></summary>
 
-# Create environment and install
+```bash
+# 1. Create and activate a new environment
 conda create -n yolo_master python=3.11 -y
 conda activate yolo_master
+
+# 2. Clone the repository
 git clone https://github.com/isLinXu/YOLO-Master
 cd YOLO-Master
+
+# 3. Install dependencies
 pip install -r requirements.txt
 pip install -e .
+
+# 4. Optional: Install FlashAttention for faster training (CUDA required)
+pip install flash_attn
 ```
+</details>
 
 ### Validation
+
+Validate the model accuracy on the COCO dataset.
 
 ```python
 from ultralytics import YOLO
 
-model = YOLO("yolo_master_n.pt")  # or s/m/l/x
+# Load the pretrained model
+model = YOLO("yolo_master_n.pt") 
+
+# Run validation
 metrics = model.val(data="coco.yaml", save_json=True)
+print(metrics.box.map)  # map50-95
 ```
 
 ### Training
 
+Train a new model on your custom dataset or COCO.
+
 ```python
 from ultralytics import YOLO
 
-model = YOLO('yolo_master.yaml')
+# Load a model
+model = YOLO('yolo_master.yaml')  # build a new model from YAML
 
 # Train the model
 results = model.train(
-  data='coco.yaml',
-  epochs=600, 
-  batch=256, 
-  imgsz=640,
-  scale=0.5,  # S:0.9; M:0.9; L:0.9; X:0.9
-  mosaic=1.0,
-  mixup=0.0,  # S:0.05; M:0.15; L:0.15; X:0.2
-  copy_paste=0.1,  # S:0.15; M:0.4; L:0.5; X:0.6
-  device="0,1,2,3",
+    data='coco.yaml',
+    epochs=600, 
+    batch=256, 
+    imgsz=640,
+    device="0,1,2,3", # Use multiple GPUs
+    scale=0.5, 
+    mosaic=1.0,
+    mixup=0.0, 
+    copy_paste=0.1
 )
-
-# Evaluate model performance on the validation set
-metrics = model.val()
-
-# Perform object detection on an image
-results = model("path/to/image.jpg")
-results[0].show()
-
 ```
 
 ### Inference
 
+Run inference on images or videos.
+
+**Python:**
 ```python
 from ultralytics import YOLO
 
 model = YOLO("yolo_master_n.pt")
 results = model("path/to/image.jpg")
-results[0].show()  # Display results
+results[0].show()
+```
+
+**CLI:**
+```bash
+yolo predict model=yolo_master_n.pt source='path/to/image.jpg' show=True
 ```
 
 ### Export
 
+Export the model to other formats for deployment (TensorRT, ONNX, etc.).
+
 ```python
-model.export(format="engine", half=True)  # TensorRT
-# or format="onnx", "openvino", etc.
+from ultralytics import YOLO
+
+model = YOLO("yolo_master_n.pt")
+model.export(format="engine", half=True)  # Export to TensorRT
+# formats: onnx, openvino, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs
 ```
 
 ### Gradio Demo
+
+Launch a local web interface to test the model interactively.
 
 ```bash
 python app.py
 # Open http://127.0.0.1:7860 in your browser
 ```
 
+## 🤝 Community & Contributing
+
+We welcome contributions! Please check out our [Contribution Guidelines](CONTRIBUTING.md) for details on how to get involved.
+
+- **Issues**: Report bugs or request features [here](https://github.com/isLinXu/YOLO-Master/issues).
+- **Pull Requests**: Submit your improvements.
+
+## 📄 License
+
+This project is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE).
+
 ## 🙏 Acknowledgements
 
 This work builds upon the excellent [Ultralytics](https://github.com/ultralytics/ultralytics) framework. Huge thanks to the community for contributions, deployments, and tutorials!
 
 ## 📝 Citation
+
+If you use YOLO-Master in your research, please cite our paper:
 
 ```bibtex
 @article{lin2025yolomaster,
@@ -231,4 +355,4 @@ This work builds upon the excellent [Ultralytics](https://github.com/ultralytics
 }
 ```
 
-⭐ If you find this work useful, please star the repository!
+⭐ **If you find this work useful, please star the repository!**
