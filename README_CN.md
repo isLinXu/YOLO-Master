@@ -44,93 +44,89 @@
 
 ---
 
-## 💡 A Humble Beginning (Introduction)
+## 💡 初心 (Introduction)
 
-> **"Exploring the frontiers of Dynamic Intelligence in YOLO."**
+> **"探索 YOLO 中动态智能的前沿。"**
 
-This work represents our passionate exploration into the evolution of Real-Time Object Detection (RTOD). To the best of our knowledge, **YOLO-Master is the first work to deeply integrate Mixture-of-Experts (MoE) with the YOLO architecture on general-purpose datasets.**
+这项工作代表了我们对实时目标检测 (RTOD) 演进的热情探索。据我们所知，**YOLO-Master 是首个在通用数据集上将混合专家 (MoE) 架构与 YOLO 深度融合的工作。**
 
-Most existing YOLO models rely on static, dense computation—allocating the same computational budget to a simple sky background as they do to a complex, crowded intersection. We believe detection models should be more "adaptive", much like the human visual system. While this initial exploration may be not perfect, it demonstrates the significant potential of **Efficient Sparse MoE (ES-MoE)** in balancing high precision with ultra-low latency. We are committed to continuous iteration and optimization to refine this approach further.
+大多数现有的 YOLO 模型依赖于静态的密集计算——即对简单的天空背景和复杂的拥挤路口分配相同的计算预算。我们认为检测模型应该更加“自适应”，就像人类视觉系统一样。虽然这次初步探索可能并不完美，但它展示了 **高效稀疏 MoE (ES-MoE)** 在平衡高精度与超低延迟方面的巨大潜力。我们将致力于持续迭代和优化，以进一步完善这一方法。
 
-Looking forward, we draw inspiration from the transformative advancements in LLMs and VLMs. We are committed to refining this approach and extending these insights to fundamental vision tasks, with the ultimate goal of tackling more ambitious frontiers like Open-Vocabulary Detection and Open-Set Segmentation.
+展望未来，我们从 LLM 和 VLM 的变革性进步中汲取灵感。我们将致力于完善这一方法，并将这些见解扩展到基础视觉任务中，最终目标是解决更具雄心的前沿问题，如开放词汇检测和开放集分割。
 
 <details>
   <summary>
-  <font size="+1"><b>Abstract</b></font>
+  <font size="+1"><b>摘要 (Abstract)</b></font>
   </summary>
-Existing Real-Time Object Detection (RTOD) methods commonly adopt YOLO-like architectures for their favorable trade-off between accuracy and speed. However, these models rely on static dense computation that applies uniform processing to all inputs, misallocating representational capacity and computational resources such as over-allocating on trivial scenes while under-serving complex ones. This mismatch results in both computational redundancy and suboptimal detection performance.
+现有的实时目标检测 (RTOD) 方法通常采用类 YOLO 架构，因为它们在精度和速度之间取得了良好的平衡。然而，这些模型依赖于静态密集计算，对所有输入应用统一的处理，导致表示能力和计算资源的分配不当，例如在简单场景上过度分配，而在复杂场景上服务不足。这种不匹配导致了计算冗余和次优的检测性能。
 
-To overcome this limitation, we propose YOLO-Master, a novel YOLO-like framework that introduces instance-conditional adaptive computation for RTOD. This is achieved through an Efficient Sparse Mixture-of-Experts (ES-MoE) block that dynamically allocates computational resources to each input according to its scene complexity. At its core, a lightweight dynamic routing network guides expert specialization during training through a diversity enhancing objective, encouraging complementary expertise among experts. Additionally, the routing network adaptively learns to activate only the most relevant experts, thereby improving detection performance while minimizing computational overhead during inference.
+为了克服这一限制，我们提出了 YOLO-Master，这是一种新颖的类 YOLO 框架，为 RTOD 引入了实例条件自适应计算。这是通过高效稀疏混合专家 (ES-MoE) 块实现的，该块根据场景复杂度动态地为每个输入分配计算资源。其核心是一个轻量级的动态路由网络，通过多样性增强目标指导专家在训练期间的专业化，鼓励专家之间形成互补的专业知识。此外，路由网络自适应地学习仅激活最相关的专家，从而在提高检测性能的同时，最大限度地减少推理过程中的计算开销。
 
-Comprehensive experiments on five large-scale benchmarks demonstrate the superiority of YOLO-Master. On MS COCO, our model achieves 42.4\% AP with 1.62ms latency, outperforming YOLOv13-N by +0.8\% mAP and 17.8\% faster inference. Notably, the gains are most pronounced on challenging dense scenes, while the model preserves efficiency on typical inputs and maintains real-time inference speed. Code: [isLinXu/YOLO-Master](https://github.com/isLinXu/YOLO-Master)
+在五个大规模基准测试上的综合实验证明了 YOLO-Master 的优越性。在 MS COCO 上，我们的模型实现了 42.4% 的 AP 和 1.62ms 的延迟，比 YOLOv13-N 高出 +0.8% mAP，推理速度快 17.8%。值得注意的是，在具有挑战性的密集场景中收益最为明显，同时模型在典型输入上保持了效率并维持了实时推理速度。代码: [isLinXu/YOLO-Master](https://github.com/isLinXu/YOLO-Master)
 </details>
 
 ---
 
-## 🎨 Architecture
+## 🎨 架构
 
 <div align="center">
   <img width="90%" alt="YOLO-Master Architecture" src="https://github.com/user-attachments/assets/6caa1065-af77-4f77-8faf-7551c013dacd" />
-  <p><i>YOLO-Master introduces ES-MoE blocks to achieve "compute-on-demand" via dynamic routing.</i></p>
+  <p><i>YOLO-Master 引入 ES-MoE 块，通过动态路由实现“按需计算”。</i></p>
 </div>
 
-### 📚 In-Depth Documentation
-For a deep dive into the design philosophy of MoE modules, detailed routing mechanisms, and optimization guides for deployment on various hardware (GPU/CPU/NPU), please refer to our Wiki:
-👉 **[Wiki: MoE Modules Explained](wiki/MoE_Modules_Explanation_EN.md)**
+### 📚 深度文档
+关于 MoE 模块的设计理念、路由机制详解以及针对不同硬件（GPU/CPU/NPU）的部署优化指南，请参阅我们的 Wiki 文档：
+👉 **[Wiki: MoE 模块详解与演进](wiki/MoE_Modules_Explanation.md)**
 
+## 📖 目录
 
-## 📖 Table of Contents
+- [初心](#-初心-introduction)
+- [架构](#-架构)
+- [更新](#-更新-latest-first)
+- [主要结果](#-主要结果)
+  - [检测](#检测)
+  - [分割](#分割)
+  - [分类](#分类)
+- [检测示例](#-检测示例)
+- [支持的任务](#-支持的任务)
+- [快速开始](#-快速开始)
+  - [安装](#安装)
+  - [验证](#验证)
+  - [训练](#训练)
+  - [推理](#推理)
+  - [导出](#导出)
+  - [Gradio 演示](#gradio-演示)
+- [社区与贡献](#-社区与贡献)
+- [许可证](#-许可证)
+- [致谢](#-致谢)
+- [引用](#-引用)
 
-- [A Humble Beginning](#-a-humble-beginning-introduction)
-- [Architecture](#-architecture)
-- [Updates](#-updates-latest-first)
-- [Main Results](#-main-results)
-  - [Detection](#detection)
-  - [Segmentation](#segmentation)
-  - [Classification](#classification)
-- [Detection Examples](#-detection-examples)
-- [Supported Tasks](#-supported-tasks)
-- [Quick Start](#-quick-start)
-  - [Installation](#installation)
-  - [Validation](#validation)
-  - [Training](#training)
-  - [Inference](#inference)
-  - [Export](#export)
-  - [Gradio Demo](#gradio-demo)
-- [Community & Contributing](#-community--contributing)
-- [License](#-license)
-- [Acknowledgements](#-acknowledgements)
-- [Citation](#-citation)
+## 🚀 更新 (Latest First)
 
+- **2025/12/30**: arXiv 论文发布。
 
-
-## 🚀 Updates (Latest First)
-
-- **2025/12/30**: arXiv paper published.
-
-
-## 📊 Main Results
-### Detection
+## 📊 主要结果
+### 检测
 <div align="center">
   <img width="450" alt="Radar chart comparing YOLO models on various datasets" src="https://github.com/user-attachments/assets/743fa632-659b-43b1-accf-f865c8b66754"/>
 </div>
 
 
 <div align="center">
-  <p><b>Table 1. Comparison with state-of-the-art Nano-scale detectors across five benchmarks.</b></p>
+  <p><b>表 1. 五个基准测试上与最先进 Nano 级检测器的比较。</b></p>
   <table style="border-collapse:collapse; width:100%; font-family:sans-serif; text-align:center; border-top:2px solid #000; border-bottom:2px solid #000; font-size:0.9em;">
     <thead>
       <tr style="border-bottom:1px solid #ddd;">
-        <th style="padding:8px; border-right:1px solid #ddd;">Dataset</th>
+        <th style="padding:8px; border-right:1px solid #ddd;">数据集</th>
         <th colspan="2" style="border-right:1px solid #ddd;">COCO</th>
         <th colspan="2" style="border-right:1px solid #ddd;">PASCAL VOC</th>
         <th colspan="2" style="border-right:1px solid #ddd;">VisDrone</th>
         <th colspan="2" style="border-right:1px solid #ddd;">KITTI</th>
         <th colspan="2" style="border-right:1px solid #ddd;">SKU-110K</th>
-        <th>Efficiency</th>
+        <th>效率</th>
       </tr>
       <tr style="border-bottom:1px solid #000;">
-        <th style="padding:8px; border-right:1px solid #ddd;">Method</th>
+        <th style="padding:8px; border-right:1px solid #ddd;">方法</th>
         <th>mAP<br>(%)</th>
         <th style="border-right:1px solid #ddd;">mAP<sub>50</sub><br>(%)</th>
         <th>mAP<br>(%)</th>
@@ -141,7 +137,7 @@ For a deep dive into the design philosophy of MoE modules, detailed routing mech
         <th style="border-right:1px solid #ddd;">mAP<sub>50</sub><br>(%)</th>
         <th>mAP<br>(%)</th>
         <th style="border-right:1px solid #ddd;">mAP<sub>50</sub><br>(%)</th>
-        <th>Latency<br>(ms)</th>
+        <th>延迟<br>(ms)</th>
       </tr>
     </thead>
     <tbody>
@@ -194,99 +190,99 @@ For a deep dive into the design philosophy of MoE modules, detailed routing mech
   </table>
 </div>
 
-### Segmentation
+### 分割
 
-| **Model**             | **Size** | **mAPbox (%)** | **mAPmask (%)** | **Gain (mAPmask)** |
+| **模型**             | **尺寸** | **mAPbox (%)** | **mAPmask (%)** | **增益 (mAPmask)** |
 | --------------------- | -------- | -------------- | --------------- | ------------------ |
 | YOLOv11-seg-N         | 640      | 38.9           | 32.0            | -                  |
 | YOLOv12-seg-N         | 640      | 39.9           | 32.8            | Baseline           |
 | **YOLO-Master-seg-N** | **640**  | **42.9**       | **35.6**        | **+2.8%** 🚀        |
 
-### Classification
+### 分类
 
-| **Model**             | **Dataset**  | **Input Size** | **Top-1 Acc (%)** | **Top-5 Acc (%)** | **Comparison**    |
+| **模型**             | **数据集**  | **输入尺寸** | **Top-1 Acc (%)** | **Top-5 Acc (%)** | **对比**    |
 | --------------------- | ------------ | -------------- | ----------------- | ----------------- | ----------------- |
 | YOLOv11-cls-N         | ImageNet     | 224            | 70.0              | 89.4              | Baseline          |
 | YOLOv12-cls-N         | ImageNet     | 224            | 71.7              | 90.5              | +1.7% Top-1       |
 | **YOLO-Master-cls-N** | **ImageNet** | **224**        | **76.6**          | **93.4**          | **+4.9% Top-1** 🔥 |
 
-## 🖼️ Detection Examples
+## 🖼️ 检测示例
 
 <div align="center">
   <img width="1416" height="856" alt="Detection Examples" src="https://github.com/user-attachments/assets/0e1fbe4a-34e7-489e-b936-6d121ede5cf6" /> </div>
-<table border="0"> <tr> <td align="center" style="font-weight: bold; background-color: #f6f8fa;"> <b>Detection</b> </td> <td width="45%"> <img src="https://github.com/user-attachments/assets/db350acd-1d91-4be6-96b2-6bdf8aac57e8" alt="Detection 1" style="width:100%; display:block; border-radius:4px;"> </td> <td width="45%"> <img src="https://github.com/user-attachments/assets/b6c80dbd-120e-428b-8d26-ea2b38a40b47" alt="Detection 2" style="width:100%; display:block; border-radius:4px;"> </td> </tr> <tr> <td align="center" style="font-weight: bold; background-color: #f6f8fa;"> <b>Segmentation</b> </td> <td width="45%"> <img src="https://github.com/user-attachments/assets/edb05e3c-cd83-41db-89f8-8ef09fc22798" alt="Segmentation 1" style="width:100%; display:block; border-radius:4px;"> </td> <td width="45%"> <img src="https://github.com/user-attachments/assets/ea138674-d7c7-48fb-b272-3ec211d161bf" alt="Segmentation 2" style="width:100%; display:block; border-radius:4px;"> </td> </tr> </table>
+<table border="0"> <tr> <td align="center" style="font-weight: bold; background-color: #f6f8fa;"> <b>检测</b> </td> <td width="45%"> <img src="https://github.com/user-attachments/assets/db350acd-1d91-4be6-96b2-6bdf8aac57e8" alt="Detection 1" style="width:100%; display:block; border-radius:4px;"> </td> <td width="45%"> <img src="https://github.com/user-attachments/assets/b6c80dbd-120e-428b-8d26-ea2b38a40b47" alt="Detection 2" style="width:100%; display:block; border-radius:4px;"> </td> </tr> <tr> <td align="center" style="font-weight: bold; background-color: #f6f8fa;"> <b>分割</b> </td> <td width="45%"> <img src="https://github.com/user-attachments/assets/edb05e3c-cd83-41db-89f8-8ef09fc22798" alt="Segmentation 1" style="width:100%; display:block; border-radius:4px;"> </td> <td width="45%"> <img src="https://github.com/user-attachments/assets/ea138674-d7c7-48fb-b272-3ec211d161bf" alt="Segmentation 2" style="width:100%; display:block; border-radius:4px;"> </td> </tr> </table>
 
 
 
-## 🧩 Supported Tasks
+## 🧩 支持的任务
 
-YOLO-Master builds upon the robust Ultralytics framework, inheriting support for various computer vision tasks. While our research primarily focuses on Real-Time Object Detection, the codebase is capable of supporting:
+YOLO-Master 建立在强大的 Ultralytics 框架之上，继承了对各种计算机视觉任务的支持。虽然我们的研究主要集中在实时目标检测，但代码库支持：
 
-| Task | Status | Description |
+| 任务 | 状态 | 描述 |
 |:-----|:------:|:------------|
-| **Object Detection** | ✅ | Real-time object detection with ES-MoE acceleration. |
-| **Instance Segmentation** | ✅ | Experimental support (inherited from Ultralytics). |
-| **Pose Estimation** | 🚧 | Experimental support (inherited from Ultralytics). |
-| **OBB Detection** | 🚧 | Experimental support (inherited from Ultralytics). |
-| **Classification** | ✅ | Image classification support. |
+| **目标检测** | ✅ | 具有 ES-MoE 加速的实时目标检测。 |
+| **实例分割** | ✅ | 实验性支持 (继承自 Ultralytics)。 |
+| **姿态估计** | 🚧 | 实验性支持 (继承自 Ultralytics)。 |
+| **OBB 检测** | 🚧 | 实验性支持 (继承自 Ultralytics)。 |
+| **图像分类** | ✅ | 图像分类支持。 |
 
-## ⚙️ Quick Start
+## ⚙️ 快速开始
 
-### Installation
+### 安装
 
 <details open>
-<summary><strong>Install via pip (Recommended)</strong></summary>
+<summary><strong>通过 pip 安装 (推荐)</strong></summary>
 
 ```bash
-# 1. Create and activate a new environment
+# 1. 创建并激活新环境
 conda create -n yolo_master python=3.11 -y
 conda activate yolo_master
 
-# 2. Clone the repository
+# 2. 克隆仓库
 git clone https://github.com/isLinXu/YOLO-Master
 cd YOLO-Master
 
-# 3. Install dependencies
+# 3. 安装依赖
 pip install -r requirements.txt
 pip install -e .
 
-# 4. Optional: Install FlashAttention for faster training (CUDA required)
+# 4. 可选: 安装 FlashAttention 以加速训练 (需要 CUDA)
 pip install flash_attn
 ```
 </details>
 
-### Validation
+### 验证
 
-Validate the model accuracy on the COCO dataset.
+在 COCO 数据集上验证模型精度。
 
 ```python
 from ultralytics import YOLO
 
-# Load the pretrained model
+# 加载预训练模型
 model = YOLO("yolo_master_n.pt") 
 
-# Run validation
+# 运行验证
 metrics = model.val(data="coco.yaml", save_json=True)
 print(metrics.box.map)  # map50-95
 ```
 
-### Training
+### 训练
 
-Train a new model on your custom dataset or COCO.
+在自定义数据集或 COCO 上训练新模型。
 
 ```python
 from ultralytics import YOLO
 
-# Load a model
-model = YOLO('cfg/models/master/v0/det/yolo-master-n.yaml')  # build a new model from YAML
+# 加载模型
+model = YOLO('cfg/models/master/v0/det/yolo-master-n.yaml')  # 从 YAML 构建新模型
 
-# Train the model
+# 训练模型
 results = model.train(
     data='coco.yaml',
     epochs=600, 
     batch=256, 
     imgsz=640,
-    device="0,1,2,3", # Use multiple GPUs
+    device="0,1,2,3", # 使用多 GPU
     scale=0.5, 
     mosaic=1.0,
     mixup=0.0, 
@@ -294,9 +290,9 @@ results = model.train(
 )
 ```
 
-### Inference
+### 推理
 
-Run inference on images or videos.
+对图像或视频进行推理。
 
 **Python:**
 ```python
@@ -312,45 +308,45 @@ results[0].show()
 yolo predict model=yolo_master_n.pt source='path/to/image.jpg' show=True
 ```
 
-### Export
+### 导出
 
-Export the model to other formats for deployment (TensorRT, ONNX, etc.).
+将模型导出为其他格式以进行部署 (TensorRT, ONNX 等)。
 
 ```python
 from ultralytics import YOLO
 
 model = YOLO("yolo_master_n.pt")
-model.export(format="engine", half=True)  # Export to TensorRT
-# formats: onnx, openvino, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs
+model.export(format="engine", half=True)  # 导出为 TensorRT
+# 格式: onnx, openvino, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs
 ```
 
-### Gradio Demo
+### Gradio 演示
 
-Launch a local web interface to test the model interactively. This application provides a user-friendly Gradio dashboard for model inference, supporting automatic model scanning, task switching (Detection, Segmentation, Classification), and real-time visualization.
+启动本地 Web 界面以交互式测试模型。此应用程序提供了一个用户友好的 Gradio 仪表板，用于模型推理，支持自动模型扫描、任务切换（检测、分割、分类）和实时可视化。
 
 ```bash
 python app.py
-# Open http://127.0.0.1:7860 in your browser
+# 在浏览器中打开 http://127.0.0.1:7860
 ```
 
-## 🤝 Community & Contributing
+## 🤝 社区与贡献
 
-We welcome contributions! Please check out our [Contribution Guidelines](CONTRIBUTING.md) for details on how to get involved.
+我们欢迎贡献！有关如何参与的详细信息，请查看我们的 [贡献指南](CONTRIBUTING.md)。
 
-- **Issues**: Report bugs or request features [here](https://github.com/isLinXu/YOLO-Master/issues).
-- **Pull Requests**: Submit your improvements.
+- **Issues**: 在 [这里](https://github.com/isLinXu/YOLO-Master/issues) 报告错误或请求功能。
+- **Pull Requests**: 提交您的改进。
 
-## 📄 License
+## 📄 许可证
 
-This project is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE).
+本项目采用 [GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE) 许可证。
 
-## 🙏 Acknowledgements
+## 🙏 致谢
 
-This work builds upon the excellent [Ultralytics](https://github.com/ultralytics/ultralytics) framework. Huge thanks to the community for contributions, deployments, and tutorials!
+这项工作建立在优秀的 [Ultralytics](https://github.com/ultralytics/ultralytics) 框架之上。非常感谢社区的贡献、部署和教程！
 
-## 📝 Citation
+## 📝 引用
 
-If you use YOLO-Master in your research, please cite our paper:
+如果您在研究中使用 YOLO-Master，请引用我们的论文：
 
 ```bibtex
 @article{lin2025yolomaster,
@@ -361,4 +357,4 @@ If you use YOLO-Master in your research, please cite our paper:
 }
 ```
 
-⭐ **If you find this work useful, please star the repository!**
+⭐ **如果您觉得这项工作有用，请给仓库点个星！**
