@@ -414,7 +414,8 @@ class YOLO_Master_WebUI:
                     conf_slider, iou_slider, device_txt, 
                     max_det_num, line_width_num, cpu_chk, options_chk
                 ],
-                outputs=[out_img, out_df, info_md]
+                outputs=[out_img, out_df, info_md],
+                show_api=False
             )
 
         app.launch(share=True)
