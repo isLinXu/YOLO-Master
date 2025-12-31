@@ -1,3 +1,6 @@
+---
+render_with_liquid: false
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>

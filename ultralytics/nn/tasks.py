@@ -1579,6 +1579,7 @@ def parse_model(d, ch, verbose=True):
             C3k2UltraPro,
             C3k2MA,
             C3k2MA_Lite,
+            ES_MOE,
         }
     )
     repeat_modules = frozenset(  # modules with 'repeat' arguments
