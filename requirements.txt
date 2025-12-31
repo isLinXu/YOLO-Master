@@ -2,8 +2,9 @@ ultralytics
 gradio==4.44.0
 opencv-python
 pillow
-numpy
+numpy<2
 matplotlib
 torch==2.1.2
 torchvision==0.16.2
 huggingface_hub==0.32.0
+gradio_client>=0.16.4

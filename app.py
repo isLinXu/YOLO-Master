@@ -417,7 +417,7 @@ class YOLO_Master_WebUI:
                 outputs=[out_img, out_df, info_md]
             )
 
-        app.launch(share=False, inbrowser=True)
+        app.launch(share=True)
 
 
 if __name__ == "__main__":
