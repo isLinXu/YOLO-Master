@@ -572,8 +572,9 @@ class BasePredictor:
                 m_y2, m_x2 = y_max // mask_scale, x_max // mask_scale
                 
                 # Activation threshold 0.15
-                if objectness_mask[m_y1:m_y2, m_x1:m_x2].max() > 0.15:
-                    active_slice_coords.append((x_min, y_min, x_max, y_max))
+                if m_y2 > m_y1 and m_x2 > m_x1:
+                    if objectness_mask[m_y1:m_y2, m_x1:m_x2].max() > 0.15:
+                        active_slice_coords.append((x_min, y_min, x_max, y_max))
 
         # Collect all boxes (Global + Slices)
         all_boxes = []

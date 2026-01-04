@@ -102,6 +102,8 @@
 - [引用](#-引用)
 
 ## 🚀 更新 (Latest First)
+- **2025/01/04**: MoE模块重构
+  > Split MoE script into separate modules (routers, experts)
 - **2026/01/03**: 新增 Sparse SAHI 推理模式：通过全局粗筛生成的 Objectness Mask 实现内容自适应的稀疏切片推理，显著提升高分辨率图像中小目标的检测速度与显存利用率。
 - **2025/12/31**: 发布演示[YOLO-Master-WebUI-Demo](https://huggingface.co/spaces/gatilin/YOLO-Master-WebUI-Demo)
 - **2025/12/31**: 发布 YOLO-Master v0.1 版本，包含检测、分割和分类模型及训练代码。
