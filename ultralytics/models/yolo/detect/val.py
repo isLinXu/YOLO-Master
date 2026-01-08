@@ -122,6 +122,10 @@ class DetectionValidator(BaseValidator):
             max_det=self.args.max_det,
             end2end=self.end2end,
             rotated=self.args.task == "obb",
+            weighted=getattr(self.args, "weighted", False),
+            cluster=getattr(self.args, "cluster", False),
+            sigma=getattr(self.args, "sigma", 0.1),
+            iou_type=getattr(self.args, "iou_type", "iou"),
         )
         return [{"bboxes": x[:, :4], "conf": x[:, 4], "cls": x[:, 5], "extra": x[:, 6:]} for x in outputs]
 

@@ -102,12 +102,14 @@
 - [引用](#-引用)
 
 ## 🚀 更新 (Latest First)
+- **2026/01/09**: [feature] 新增Cluster-Weighted NMS (CW-NMS)来优化与平衡mAP和推理速度。
+  > cluster: False # (bool) cluster NMS (MoE optimized)
 - **2026/01/07**: [TensorRT-YOLO](https://github.com/laugh12321/TensorRT-YOLO) 为 YOLO-Master 提供加速，感谢贡献！
 - **2026/01/07**: 新增MoE loss显式加入到training中
   > Epoch    GPU_mem   box_loss   cls_loss   dfl_loss   **moe_loss**  Instances  Size
 - **2026/01/04**: MoE模块重构
   > Split MoE script into separate modules (routers, experts)
-- **2026/01/03**: 新增 Sparse SAHI 推理模式：通过全局粗筛生成的 Objectness Mask 实现内容自适应的稀疏切片推理，显著提升高分辨率图像中小目标的检测速度与显存利用率。
+- **2026/01/03**: [feature] 新增 Sparse SAHI 推理模式：通过全局粗筛生成的 Objectness Mask 实现内容自适应的稀疏切片推理，显著提升高分辨率图像中小目标的检测速度与显存利用率。
 - **2025/12/31**: 发布演示[YOLO-Master-WebUI-Demo](https://huggingface.co/spaces/gatilin/YOLO-Master-WebUI-Demo)
 - **2025/12/31**: 发布 YOLO-Master v0.1 版本，包含检测、分割和分类模型及训练代码。
 - **2025/12/30**: arXiv 论文发布。

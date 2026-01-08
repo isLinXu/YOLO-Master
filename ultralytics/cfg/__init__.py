@@ -159,6 +159,7 @@ CFG_FLOAT_KEYS = frozenset(
         "time",
         "workspace",
         "batch",
+        "sigma",
     }
 )
 CFG_FRACTION_KEYS = frozenset(
@@ -238,6 +239,8 @@ CFG_BOOL_KEYS = frozenset(
         "nms",
         "profile",
         "multi_scale",
+        "weighted",
+        "cluster",
     }
 )
 

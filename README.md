@@ -105,12 +105,14 @@ For a deep dive into the design philosophy of MoE modules, detailed routing mech
 
 
 ## 🚀 Updates (Latest First)
+- **2026/01/09**: [feature] Add Cluster-Weighted NMS (CW-NMS) to trade mAP vs speed.
+  > cluster: False # (bool) cluster NMS (MoE optimized)
 - **2026/01/07**: [TensorRT-YOLO](https://github.com/laugh12321/TensorRT-YOLO) accelerates YOLO-Master. Thanks to them!
 - **2026/01/07**: Add MoE loss explicitly into training.
   > Epoch    GPU_mem   box_loss   cls_loss   dfl_loss   **moe_loss**  Instances  Size
 - **2026/01/04**: Split MoE script into modules
   > Split MoE script into separate modules (routers, experts)
-- **2026/01/03**: Added Sparse SAHI Inference Mode: Introduced a content-adaptive sparse slicing mechanism guided by a global Objectness Mask, significantly accelerating small object detection in high-resolution images while optimizing GPU memory efficiency.
+- **2026/01/03**: [feature] Added Sparse SAHI Inference Mode: Introduced a content-adaptive sparse slicing mechanism guided by a global Objectness Mask, significantly accelerating small object detection in high-resolution images while optimizing GPU memory efficiency.
 - **2025/12/31**: Released the demo [YOLO-Master-WebUI-Demo](https://huggingface.co/spaces/gatilin/YOLO-Master-WebUI-Demo).
 - **2025/12/31**: Released YOLO-Master v0.1 with code, pre-trained weights, and documentation.
 - **2025/12/30**: arXiv paper published.

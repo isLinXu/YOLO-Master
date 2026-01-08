@@ -64,6 +64,10 @@ stream_buffer: False # (bool) True buffers all frames; False keeps the most rece
 visualize: False # (bool) visualize model features (predict) or TP/FP/FN confusion (val)
 augment: False # (bool) apply test-time augmentation during prediction
 agnostic_nms: False # (bool) class-agnostic NMS
+weighted: False # (bool) weighted NMS
+cluster: False # (bool) cluster NMS (MoE optimized)
+sigma: 0.1 # (float) Gaussian sigma for Cluster-Weighted NMS
+iou_type: iou # (str) NMS IoU type (iou, diou, ciou)
 classes: # (int | list[int], optional) filter by class id(s), e.g. 0 or [0,2,3]
 retina_masks: False # (bool) use high-resolution segmentation masks (segment)
 embed: # (list[int], optional) return feature embeddings from given layer indices

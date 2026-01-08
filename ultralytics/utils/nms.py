@@ -6,7 +6,7 @@ import time
 import torch
 
 from ultralytics.utils import LOGGER
-from ultralytics.utils.metrics import batch_probiou, box_iou
+from ultralytics.utils.metrics import batch_probiou, bbox_iou, box_iou
 from ultralytics.utils.ops import xywh2xyxy
 
 
@@ -26,6 +26,10 @@ def non_max_suppression(
     rotated: bool = False,
     end2end: bool = False,
     return_idxs: bool = False,
+    iou_type: str = "iou",
+    weighted: bool = False,
+    cluster: bool = False,  # Cluster-Weighted NMS
+    sigma: float = 0.1,  # Gaussian sigma for Cluster-Weighted NMS
 ):
     """Perform non-maximum suppression (NMS) on prediction results.
 
@@ -49,6 +53,10 @@ def non_max_suppression(
         rotated (bool): Whether to handle Oriented Bounding Boxes (OBB).
         end2end (bool): Whether the model is end-to-end and doesn't require NMS.
         return_idxs (bool): Whether to return the indices of kept detections.
+        iou_type (str): IoU type for NMS. Options are 'iou', 'diou', 'ciou'.
+        weighted (bool): Whether to perform weighted NMS.
+        cluster (bool): Whether to perform Cluster-Weighted NMS (MoE optimized).
+        sigma (float): Gaussian sigma for Cluster-Weighted NMS.
 
     Returns:
         output (list[torch.Tensor]): List of detections per image with shape (num_boxes, 6 + num_masks) containing (x1,
@@ -148,13 +156,55 @@ def non_max_suppression(
         else:
             boxes = x[:, :4] + c  # boxes (offset by class)
             # Speed strategy: torchvision for val or already loaded (faster), TorchNMS for predict (lower latency)
-            if "torchvision" in sys.modules:
+            if "torchvision" in sys.modules and iou_type == "iou":
                 import torchvision  # scope as slow import
 
                 i = torchvision.ops.nms(boxes, scores, iou_thres)
             else:
-                i = TorchNMS.nms(boxes, scores, iou_thres)
+                i = TorchNMS.nms(boxes, scores, iou_thres, iou_type=iou_type)
         i = i[:max_det]  # limit detections
+
+        if (weighted or cluster) and i.shape[0] > 0 and not rotated:
+            # Weighted NMS or Cluster-Weighted NMS
+            keep_boxes = boxes[i]  # Boxes with class offsets (for IoU)
+            
+            # Optimization: Only consider boxes with sufficient confidence for fusion
+            if cluster:
+                 # Reuse high confidence candidates
+                 candidate_mask = scores > conf_thres
+                 if candidate_mask.sum() > 3000:
+                     _, topk_idx = scores.topk(3000)
+                     candidate_mask = torch.zeros_like(scores, dtype=torch.bool)
+                     candidate_mask[topk_idx] = True
+                 
+                 candidate_boxes = boxes[candidate_mask]  # With offsets (for IoU)
+                 candidate_boxes_raw = x[candidate_mask, :4]  # Without offsets (for averaging)
+                 candidate_scores = scores[candidate_mask]
+            else:
+                 candidate_boxes = boxes
+                 candidate_boxes_raw = x[:, :4]
+                 candidate_scores = scores
+
+            if candidate_boxes.shape[0] > 0:
+                # Calculate IoU between kept boxes and candidate boxes (using offsets to respect classes)
+                iou = box_iou(keep_boxes, candidate_boxes)
+                
+                # Identify overlapping boxes
+                mask = iou > iou_thres
+                
+                if cluster:
+                    # Cluster-Weighted NMS: Gaussian weighting based on IoU
+                    weights = candidate_scores * torch.exp(-(1 - iou) ** 2 / sigma) * mask
+                else:
+                    # Standard Weighted NMS: Linear weighting
+                    weights = candidate_scores * mask
+                
+                # Calculate weighted coordinates using RAW coordinates (no offsets)
+                weights_sum = weights.sum(1, keepdim=True) + 1e-6
+                new_xy = (weights @ candidate_boxes_raw) / weights_sum
+                
+                # Update kept boxes
+                x[i, :4] = new_xy
 
         output[xi] = x[i]
         if return_idxs:
@@ -236,13 +286,14 @@ class TorchNMS:
         return sorted_idx[pick]
 
     @staticmethod
-    def nms(boxes: torch.Tensor, scores: torch.Tensor, iou_threshold: float) -> torch.Tensor:
+    def nms(boxes: torch.Tensor, scores: torch.Tensor, iou_threshold: float, iou_type: str = "iou") -> torch.Tensor:
         """Optimized NMS with early termination that matches torchvision behavior exactly.
 
         Args:
             boxes (torch.Tensor): Bounding boxes with shape (N, 4) in xyxy format.
             scores (torch.Tensor): Confidence scores with shape (N,).
             iou_threshold (float): IoU threshold for suppression.
+            iou_type (str): IoU type for NMS. Options are 'iou', 'diou', 'ciou'.
 
         Returns:
             (torch.Tensor): Indices of boxes to keep after NMS.
@@ -275,21 +326,27 @@ class TorchNMS:
                 break
             # Vectorized IoU calculation for remaining boxes
             rest = order[1:]
-            xx1 = torch.maximum(x1[i], x1[rest])
-            yy1 = torch.maximum(y1[i], y1[rest])
-            xx2 = torch.minimum(x2[i], x2[rest])
-            yy2 = torch.minimum(y2[i], y2[rest])
+            if iou_type == "iou":
+                xx1 = torch.maximum(x1[i], x1[rest])
+                yy1 = torch.maximum(y1[i], y1[rest])
+                xx2 = torch.minimum(x2[i], x2[rest])
+                yy2 = torch.minimum(y2[i], y2[rest])
 
-            # Fast intersection and IoU
-            w = (xx2 - xx1).clamp_(min=0)
-            h = (yy2 - yy1).clamp_(min=0)
-            inter = w * h
-            # Early exit: skip IoU calculation if no intersection
-            if inter.sum() == 0:
-                # No overlaps with current box, keep all remaining boxes
-                order = rest
-                continue
-            iou = inter / (areas[i] + areas[rest] - inter)
+                # Fast intersection and IoU
+                w = (xx2 - xx1).clamp_(min=0)
+                h = (yy2 - yy1).clamp_(min=0)
+                inter = w * h
+                # Early exit: skip IoU calculation if no intersection
+                if inter.sum() == 0:
+                    # No overlaps with current box, keep all remaining boxes
+                    order = rest
+                    continue
+                iou = inter / (areas[i] + areas[rest] - inter)
+            else:
+                iou = bbox_iou(
+                    boxes[i], boxes[rest], xywh=False, DIoU=(iou_type == "diou"), CIoU=(iou_type == "ciou")
+                ).squeeze(-1)
+
             # Keep boxes with IoU <= threshold
             order = rest[iou <= iou_threshold]
 
