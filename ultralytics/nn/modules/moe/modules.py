@@ -379,6 +379,7 @@ class ES_MOE(nn.Module):
             self.load_balancing_loss = self.load_balancing_loss.to(load_balance_loss.device).reshape(())
         self.load_balancing_loss.copy_(load_balance_loss.detach())
         self.expert_usage_counts.copy_(expert_usage.detach())
+        return load_balance_loss
     
     def get_load_balancing_loss(self):
         """Get load-balancing loss."""
