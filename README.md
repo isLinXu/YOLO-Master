@@ -105,6 +105,7 @@ For a deep dive into the design philosophy of MoE modules, detailed routing mech
 
 
 ## 🚀 Updates (Latest First)
+- **2026/01/14**: [ncnn-YOLO-Master-android](https://github.com/mpj1234/ncnn-YOLO-Master-android) support deploy YOLO-Master. Thanks to them!
 - **2026/01/09**: [feature] Add Cluster-Weighted NMS (CW-NMS) to trade mAP vs speed.
   > cluster: False # (bool) cluster NMS (MoE optimized)
 - **2026/01/07**: [TensorRT-YOLO](https://github.com/laugh12321/TensorRT-YOLO) accelerates YOLO-Master. Thanks to them!

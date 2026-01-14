@@ -102,6 +102,7 @@
 - [引用](#-引用)
 
 ## 🚀 更新 (Latest First)
+- **2026/01/14**: [ncnn-YOLO-Master-android](https://github.com/mpj1234/ncnn-YOLO-Master-android)为YOLO-Master提供部署，感谢贡献！
 - **2026/01/09**: [feature] 新增Cluster-Weighted NMS (CW-NMS)来优化与平衡mAP和推理速度。
   > cluster: False # (bool) cluster NMS (MoE optimized)
 - **2026/01/07**: [TensorRT-YOLO](https://github.com/laugh12321/TensorRT-YOLO) 为 YOLO-Master 提供加速，感谢贡献！
