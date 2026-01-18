@@ -41,6 +41,7 @@ from ultralytics.utils import (
     emojis,
 )
 from ultralytics.utils.autobatch import check_train_batch_size
+from ultralytics.utils.lora import apply_lora, save_lora_adapters
 from ultralytics.utils.checks import check_amp, check_file, check_imgsz, check_model_file_from_stem, print_args
 from ultralytics.utils.dist import ddp_cleanup, generate_ddp_command
 from ultralytics.utils.files import get_latest_run
@@ -266,6 +267,7 @@ class BaseTrainer:
         """Build dataloaders and optimizer on correct rank process."""
         ckpt = self.setup_model()
         self.model = self.model.to(self.device)
+        self.model = apply_lora(self.model, self.args)
         self.set_model_attributes()
 
         # Compile model
@@ -619,6 +621,17 @@ class BaseTrainer:
         self.last.write_bytes(serialized_ckpt)  # save last.pt
         if self.best_fitness == self.fitness:
             self.best.write_bytes(serialized_ckpt)  # save best.pt
+        
+        # Save LoRA adapters if enabled
+        if hasattr(self.args, 'lora_r') and self.args.lora_r > 0 and getattr(self.args, 'lora_save_adapters', True):
+            adapter_dir = self.wdir / (getattr(self.args, 'lora_adapter_dir', 'lora_adapter') + f"_epoch{self.epoch}")
+            if self.best_fitness == self.fitness:
+                best_adapter_dir = self.wdir / (getattr(self.args, 'lora_adapter_dir', 'lora_adapter') + "_best")
+                save_lora_adapters(self.model, best_adapter_dir)
+            
+            if (self.save_period > 0) and (self.epoch % self.save_period == 0):
+                save_lora_adapters(self.model, adapter_dir)
+
         if (self.save_period > 0) and (self.epoch % self.save_period == 0):
             (self.wdir / f"epoch{self.epoch}.pt").write_bytes(serialized_ckpt)  # save epoch, i.e. 'epoch3.pt'
 
