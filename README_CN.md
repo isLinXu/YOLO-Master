@@ -1,46 +1,29 @@
-<div align="center">
-  <h1>YOLO-MASTER</h1>
+<img width="960" height="180" alt="Image" src="https://github.com/user-attachments/assets/5d2ab671-cf2f-4697-9c1b-1dfe611111e3" />
 
+<p align="center">
+  <a href="https://huggingface.co/spaces/gatilin/YOLO-Master-WebUI-Demo"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue" alt="Hugging Face Spaces"></a>
+  <a href="https://colab.research.google.com/drive/1gTKkCsE4sXIOWpu1cdNBjdFHEahBoZD0?usp=sharing"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+  <a href="https://arxiv.org/abs/2512.23273"><img src="https://img.shields.io/badge/arXiv-2512.23273-b31b1b.svg" alt="arXiv"></a>
+  <a href="https://github.com/isLinXu/YOLO-Master/releases"><img src="https://img.shields.io/badge/%F0%9F%93%A6-Model%20Zoo-orange" alt="Model Zoo"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-AGPL%203.0-blue.svg" alt="AGPL 3.0"></a>
+  <a href="https://github.com/ultralytics/ultralytics"><img src="https://img.shields.io/badge/Ultralytics-YOLO-blue" alt="Ultralytics"></a>
+</p>
 
-<p align="left"> <a href="https://huggingface.co/spaces/gatilin/YOLO-Master-WebUI-Demo"> <img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue" alt="Hugging Face Spaces"> </a> <a href="https://colab.research.google.com/drive/1gTKkCsE4sXIOWpu1cdNBjdFHEahBoZD0?usp=sharing"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"> </a> <a href="https://arxiv.org/abs/2512.23273"> <img src="https://img.shields.io/badge/arXiv-2512.23273-b31b1b.svg" alt="arXiv"> </a>  <a href="https://github.com/isLinXu/YOLO-Master/releases"> <img src="https://img.shields.io/badge/%F0%9F%93%A6-Model%20Zoo-orange" alt="Model Zoo"> </a> <a href="./LICENSE"> <img src="https://img.shields.io/badge/License-AGPL%203.0-blue.svg" alt="AGPL 3.0"> </a> <a href="https://github.com/ultralytics/ultralytics"> <img src="https://img.shields.io/badge/Ultralytics-YOLO-blue" alt="Ultralytics"> </a> </p>
+<img
+  width="224"
+  alt="YOLO-Master Mascot"
+  src="https://github.com/user-attachments/assets/bbf751ea-af27-465d-a8a9-7822db343638"
+  align="left"
+/>
 
+`YOLO-Master` 是一个面向实时目标检测（RTOD）的 YOLO-like 框架，首次在通用数据集上将 **Mixture-of-Experts (MoE)** 深度融合进 YOLO 架构，通过 **Efficient Sparse MoE (ES‑MoE)** 与轻量级 **动态路由（Dynamic Routing）** 实现 **instance‑conditional adaptive computation**：让模型按场景复杂度“按需分配算力（compute-on-demand）”，在高精度与超低延迟之间取得更优平衡。  
 
-  <p align="center">
-    YOLO-Master: 
-    <b><u>M</u></b>OE-<b><u>A</u></b>ccelerated with 
-    <b><u>S</u></b>pecialized <b><u>T</u></b>ransformers for 
-    <b><u>E</u></b>nhanced <b><u>R</u></b>eal-time Detection.
-  </p>
-</div>
-
-<div align="center">
-  <div style="text-align: center; margin-bottom: 8px;">
-    <a href="https://github.com/isLinXu" style="text-decoration: none;"><b>Xu Lin</b></a><sup>1*</sup>&nbsp;&nbsp;
-    <a href="https://pjl1995.github.io/" style="text-decoration: none;"><b>Jinlong Peng</b></a><sup>1*</sup>&nbsp;&nbsp;
-    <a href="https://scholar.google.com/citations?user=fa4NkScAAAAJ" style="text-decoration: none;"><b>Zhenye Gan</b></a><sup>1</sup>&nbsp;&nbsp;
-    <a href="https://scholar.google.com/citations?hl=en&user=cU0UfhwAAAAJ" style="text-decoration: none;"><b>Jiawen Zhu</b></a><sup>2</sup>&nbsp;&nbsp;
-    <a href="https://scholar.google.com/citations?user=JIKuf4AAAAAJ&hl=zh-TW" style="text-decoration: none;"><b>Jun Liu</b></a><sup>1</sup>
-  </div>
-
-  <div style="text-align: center; margin-bottom: 4px; font-size: 0.95em;">
-    <sup>1</sup>Tencent Youtu Lab &nbsp;&nbsp;&nbsp;
-    <sup>2</sup>Singapore Management University
-  </div>
-
-  <div style="text-align: center; margin-bottom: 12px; font-size: 0.85em; color: #666; font-style: italic;">
-    <sup>*</sup>Equal Contribution
-  </div>
-
-  <div style="text-align: center;">
-    <div style="font-family: 'Courier New', Courier, monospace; font-size: 0.85em; background-color: #f6f8fa; padding: 10px; border-radius: 6px; display: inline-block; line-height: 1.4; text-align: left;">
-      {gatilin, jeromepeng, wingzygan, juliusliu}@tencent.com <br>
-      jwzhu.2022@phdcs.smu.edu.sg
-    </div>
-  </div>
-</div>
-<br>
-
-[English](README.md) | [简体中文](README_CN.md)
+**主要亮点：**
+- **方法创新（ES‑MoE + Dynamic Routing）**：通过动态路由网络引导专家分工训练，并在推理时激活最相关专家，减少冗余计算并提升检测表现。
+- **性能验证（精度 × 延迟）**：在 MS COCO 上，YOLO‑Master‑N 达到 **42.4% AP @ 1.62ms latency**；相较 YOLOv13‑N **+0.8% mAP 且 17.8% 更快**。
+- **Compute‑on‑Demand**：从“静态致密计算”走向“按输入内容自适应分配算力”，密集/困难场景收益更显著。
+- **开箱即用全流程**：提供安装、验证、训练、推理与导出（ONNX/TensorRT 等）完整链路。 
+- **持续工程化演进**：包含 MoE 剪枝与分析工具（diagnose_model / prune_moe_model）、CW‑NMS、Sparse SAHI 推理模式等增强。 
 
 ---
 
