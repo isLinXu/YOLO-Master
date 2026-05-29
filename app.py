@@ -272,6 +272,39 @@ class YOLO_Master_WebUI:
         
         return res_img, df, summary
 
+    def inference_stream(
+        self,
+        task: str,
+        frame: np.ndarray,
+        model_dropdown: str,
+        custom_model_path: str,
+        conf: float,
+        iou: float,
+        device: str,
+        max_det: float,
+        line_width: float,
+        cpu: bool,
+        checkboxes: List[str],
+    ):
+        """Run inference for a webcam frame without refreshing the detections table."""
+        if frame is None:
+            return None, "Waiting for webcam stream..."
+
+        out_img, _df, summary = self.inference(
+            task,
+            frame,
+            model_dropdown,
+            custom_model_path,
+            conf,
+            iou,
+            device,
+            max_det,
+            line_width,
+            cpu,
+            checkboxes,
+        )
+        return out_img, summary
+
     def describe_model(self, task: str, model_path: str) -> str:
         """Validate and describe the model."""
         if not model_path or not model_path.strip():
@@ -387,10 +420,40 @@ class YOLO_Master_WebUI:
                 with gr.Column(scale=3):
                     with gr.Tabs():
                         with gr.TabItem("🖼️ Visualization"):
-                            with gr.Row():
-                                inp_img = gr.Image(type="numpy", label="Input Image", height=500, value=self.load_default_image())
-                                out_img = gr.Image(type="numpy", label="Inference Result", height=500, interactive=False)
-                            info_md = gr.Markdown(value="Waiting for input...")
+                            with gr.Tabs():
+                                with gr.TabItem("Image"):
+                                    with gr.Row():
+                                        inp_img = gr.Image(
+                                            type="numpy",
+                                            label="Input Image",
+                                            height=500,
+                                            value=self.load_default_image()
+                                        )
+                                        out_img = gr.Image(
+                                            type="numpy",
+                                            label="Inference Result",
+                                            height=500,
+                                            interactive=False
+                                        )
+                                    info_md = gr.Markdown(value="Waiting for input...")
+
+                                with gr.TabItem("Live Webcam"):
+                                    with gr.Row():
+                                        webcam_img = gr.Image(
+                                            sources=["webcam"],
+                                            streaming=True,
+                                            type="numpy",
+                                            label="Webcam Stream",
+                                            height=500,
+                                            mirror_webcam=True,
+                                        )
+                                        webcam_out_img = gr.Image(
+                                            type="numpy",
+                                            label="Live Inference Result",
+                                            height=500,
+                                            interactive=False
+                                        )
+                                    webcam_info_md = gr.Markdown(value="Waiting for webcam stream...")
 
                         with gr.TabItem("📊 Data Analysis"):
                             gr.Markdown("### Detections Data")
@@ -415,6 +478,22 @@ class YOLO_Master_WebUI:
                     max_det_num, line_width_num, cpu_chk, options_chk
                 ],
                 outputs=[out_img, out_df, info_md],
+                concurrency_limit=1,
+                concurrency_id="model-inference",
+                show_api=False
+            )
+            webcam_img.stream(
+                fn=self.inference_stream,
+                inputs=[
+                    task_radio, webcam_img, model_dd, custom_model_txt,
+                    conf_slider, iou_slider, device_txt,
+                    max_det_num, line_width_num, cpu_chk, options_chk
+                ],
+                outputs=[webcam_out_img, webcam_info_md],
+                show_progress="hidden",
+                trigger_mode="always_last",
+                concurrency_limit=1,
+                concurrency_id="model-inference",
                 show_api=False
             )
 
