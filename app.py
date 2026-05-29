@@ -21,6 +21,8 @@ warnings.filterwarnings("ignore")
 
 class GlobalConfig:
     """Global configuration parameters for easy modification."""
+    PROJECT_URL = "https://github.com/Tencent/YOLO-Master"
+    MASCOT_IMAGE_URL = "https://github.com/user-attachments/assets/bbf751ea-af27-465d-a8a9-7822db343638"
     # Default model files mapping
     DEFAULT_MODELS = {
         "detect": "ckpts/yolo-master-v0.1-n.pt",
@@ -156,6 +158,173 @@ class YOLO_Master_WebUI:
         self.ckpts_root = Path(ckpts_root)
         self.model_manager = ModelManager(self.ckpts_root)
         self.model_map = self.model_manager.scan_checkpoints()
+
+    def brand_header(self) -> str:
+        return f"""
+        <style>
+            .ym-brand {{
+                position: relative;
+                overflow: hidden;
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                gap: 22px;
+                align-items: center;
+                padding: 18px 22px;
+                margin-bottom: 16px;
+                border: 1px solid rgba(102, 153, 255, 0.26);
+                border-radius: 18px;
+                background:
+                    linear-gradient(135deg, rgba(21, 32, 55, 0.98), rgba(10, 15, 30, 0.94)),
+                    radial-gradient(circle at 80% 20%, rgba(45, 196, 255, 0.22), transparent 28%);
+                box-shadow: 0 18px 46px rgba(5, 12, 28, 0.26);
+            }}
+            .ym-brand:before {{
+                content: "";
+                position: absolute;
+                inset: 0;
+                background-image:
+                    linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+                background-size: 28px 28px;
+                mask-image: linear-gradient(90deg, rgba(0,0,0,0.7), transparent);
+                pointer-events: none;
+            }}
+            .ym-brand-main {{
+                position: relative;
+                z-index: 1;
+                min-width: 0;
+            }}
+            .ym-brand-kicker {{
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                align-items: center;
+                margin-bottom: 8px;
+            }}
+            .ym-pill {{
+                display: inline-flex;
+                align-items: center;
+                min-height: 26px;
+                padding: 4px 10px;
+                border-radius: 999px;
+                color: #eaf4ff;
+                background: rgba(55, 94, 160, 0.28);
+                border: 1px solid rgba(140, 185, 255, 0.28);
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0;
+                white-space: nowrap;
+            }}
+            .ym-pill-cvpr {{
+                color: #102032;
+                background: linear-gradient(135deg, #8be9ff, #75ffa8);
+                border-color: rgba(255, 255, 255, 0.42);
+            }}
+            .ym-title {{
+                margin: 0;
+                color: #ffffff;
+                font-size: clamp(30px, 4vw, 52px);
+                line-height: 0.96;
+                font-weight: 900;
+                letter-spacing: 0;
+            }}
+            .ym-subtitle {{
+                max-width: 850px;
+                margin: 10px 0 14px;
+                color: rgba(235, 245, 255, 0.82);
+                font-size: 15px;
+                line-height: 1.55;
+            }}
+            .ym-actions {{
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }}
+            .ym-action {{
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 38px;
+                padding: 8px 14px;
+                border-radius: 10px;
+                text-decoration: none !important;
+                font-weight: 800;
+                font-size: 14px;
+                letter-spacing: 0;
+                transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+            }}
+            .ym-action:hover {{
+                transform: translateY(-1px);
+            }}
+            .ym-action-primary {{
+                color: #08111f !important;
+                background: #ffffff;
+                border: 1px solid rgba(255,255,255,0.72);
+            }}
+            .ym-action-secondary {{
+                color: #f4fbff !important;
+                background: rgba(255,255,255,0.08);
+                border: 1px solid rgba(255,255,255,0.20);
+            }}
+            .ym-mascot-link {{
+                position: relative;
+                z-index: 1;
+                display: block;
+                width: clamp(116px, 12vw, 166px);
+                aspect-ratio: 1;
+                border-radius: 18px;
+                overflow: hidden;
+                background: rgba(255,255,255,0.08);
+                border: 1px solid rgba(255,255,255,0.20);
+                box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+            }}
+            .ym-mascot {{
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }}
+            @media (max-width: 760px) {{
+                .ym-brand {{
+                    grid-template-columns: 1fr;
+                    padding: 16px;
+                }}
+                .ym-mascot-link {{
+                    width: 112px;
+                    justify-self: start;
+                }}
+                .ym-title {{
+                    font-size: 32px;
+                }}
+            }}
+        </style>
+        <section class="ym-brand" aria-label="YOLO-Master project banner">
+            <div class="ym-brand-main">
+                <div class="ym-brand-kicker">
+                    <span class="ym-pill ym-pill-cvpr">CVPR 2026</span>
+                    <span class="ym-pill">Tencent Youtu Lab</span>
+                    <span class="ym-pill">ES-MoE RTOD</span>
+                </div>
+                <h1 class="ym-title">YOLO-Master WebUI</h1>
+                <p class="ym-subtitle">
+                    MOE-Accelerated with Specialized Transformers for Enhanced Real-time Detection.
+                    Try the demo here, then visit the official Tencent/YOLO-Master repository for code,
+                    models, citation, and updates.
+                </p>
+                <div class="ym-actions">
+                    <a class="ym-action ym-action-primary" href="{GlobalConfig.PROJECT_URL}" target="_blank" rel="noopener noreferrer">
+                        Star Tencent/YOLO-Master
+                    </a>
+                    <a class="ym-action ym-action-secondary" href="https://github.com/Tencent/YOLO-Master#-citation" target="_blank" rel="noopener noreferrer">
+                        CVPR 2026 Citation
+                    </a>
+                </div>
+            </div>
+            <a class="ym-mascot-link" href="{GlobalConfig.PROJECT_URL}" target="_blank" rel="noopener noreferrer" aria-label="Open Tencent YOLO-Master on GitHub">
+                <img class="ym-mascot" src="{GlobalConfig.MASCOT_IMAGE_URL}" alt="YOLO-Master Tencent mascot">
+            </a>
+        </section>
+        """
     
     def load_default_image(self) -> Optional[np.ndarray]:
         p = Path(GlobalConfig.DEFAULT_IMAGE_DIR)
@@ -362,7 +531,7 @@ class YOLO_Master_WebUI:
 
     def launch(self):
         with gr.Blocks(title="YOLO-Master WebUI", theme=GlobalConfig.THEME) as app:
-            gr.Markdown("# 🚀 YOLO-Master Dashboard")
+            gr.HTML(self.brand_header())
             
             with gr.Row(equal_height=False):
                 # ================= Sidebar: Control Panel =================
