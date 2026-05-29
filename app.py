@@ -25,6 +25,11 @@ class GlobalConfig:
     PROJECT_URL = "https://github.com/Tencent/YOLO-Master"
     MASCOT_IMAGE_URL = "https://github.com/user-attachments/assets/bbf751ea-af27-465d-a8a9-7822db343638"
     STREAM_DISABLED_OPTIONS = {"half", "show", "save", "save_txt", "save_crop"}
+    STREAM_PRESETS = {
+        "Fast": {"max_side": 480, "interval": 0.10, "stride": 3, "max_det": 80},
+        "Balanced": {"max_side": 640, "interval": 0.15, "stride": 2, "max_det": 120},
+        "Quality": {"max_side": 832, "interval": 0.20, "stride": 1, "max_det": 200},
+    }
     # Default model files mapping
     DEFAULT_MODELS = {
         "detect": "ckpts/yolo-master-v0.1-n.pt",
@@ -354,6 +359,15 @@ class YOLO_Master_WebUI:
         new_size = (max(1, int(w * scale)), max(1, int(h * scale)))
         return cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
 
+    def update_stream_preset(self, preset: str):
+        config = GlobalConfig.STREAM_PRESETS.get(preset, GlobalConfig.STREAM_PRESETS["Balanced"])
+        return (
+            gr.update(value=config["max_side"]),
+            gr.update(value=config["interval"]),
+            gr.update(value=config["stride"]),
+            gr.update(value=config["max_det"]),
+        )
+
     def inference(self, 
                   task: str, 
                   image: np.ndarray, 
@@ -385,9 +399,10 @@ class YOLO_Master_WebUI:
         options = {k: True for k in enabled_options}
         if stream_mode and stream_max_side:
             options["imgsz"] = int(stream_max_side)
+        options["verbose"] = False
         
         # Optimization for segmentation task
-        if task == "seg" and "retina_masks" not in options:
+        if task == "seg" and not stream_mode and "retina_masks" not in options:
             options["retina_masks"] = True
 
         # 2. Model Loading
@@ -406,13 +421,14 @@ class YOLO_Master_WebUI:
                 image = self.resize_for_stream(image, stream_max_side or 0)
             image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             
-            results = model(image_bgr, 
-                            conf=conf, 
-                            iou=iou, 
-                            device=device_opt, 
-                            max_det=max_det_opt, 
-                            line_width=line_width_opt, 
-                            **options)
+            with torch.inference_mode():
+                results = model(image_bgr,
+                                conf=conf,
+                                iou=iou,
+                                device=device_opt,
+                                max_det=max_det_opt,
+                                line_width=line_width_opt,
+                                **options)
         except Exception as e:
             return image, None, f"❌ Inference Error: {str(e)}"
 
@@ -474,12 +490,13 @@ class YOLO_Master_WebUI:
         conf: float,
         iou: float,
         device: str,
-        max_det: float,
         line_width: float,
         cpu: bool,
         checkboxes: List[str],
         stream_max_side: float,
         min_frame_interval: float,
+        frame_stride: float,
+        stream_max_det: float,
         stream_state: Optional[Dict[str, Any]],
     ):
         """Run inference for a webcam frame without refreshing the detections table."""
@@ -488,17 +505,29 @@ class YOLO_Master_WebUI:
             return None, "Waiting for webcam stream...", stream_state
 
         now = time.monotonic()
+        frame_index = int(stream_state.get("frame_index", 0)) + 1
+        processed_frames = int(stream_state.get("processed_frames", 0))
+        skipped_frames = int(stream_state.get("skipped_frames", 0))
         last_time = float(stream_state.get("last_time", 0.0))
-        last_output = stream_state.get("last_output")
         last_summary = stream_state.get("last_summary")
-        if (
+        stream_state["frame_index"] = frame_index
+
+        frame_stride = max(1, int(frame_stride or 1))
+        should_skip_stride = last_summary is not None and (frame_index - 1) % frame_stride != 0
+        should_skip_time = (
             min_frame_interval
-            and last_output is not None
             and last_summary is not None
             and now - last_time < float(min_frame_interval)
+        )
+        if (
+            should_skip_stride
+            or should_skip_time
         ):
-            return last_output, last_summary, stream_state
+            skipped_frames += 1
+            stream_state["skipped_frames"] = skipped_frames
+            return gr.update(), last_summary, stream_state
 
+        process_start = time.monotonic()
         out_img, _df, summary = self.inference(
             task,
             frame,
@@ -507,18 +536,35 @@ class YOLO_Master_WebUI:
             conf,
             iou,
             device,
-            max_det,
+            stream_max_det,
             line_width,
             cpu,
             checkboxes,
             stream_mode=True,
             stream_max_side=stream_max_side,
         )
+        process_end = time.monotonic()
         if out_img is not None:
+            processed_frames += 1
+            elapsed_since_last = process_end - last_time if last_time else 0.0
+            fps = 1.0 / elapsed_since_last if elapsed_since_last > 0 else 0.0
+            latency_ms = (process_end - process_start) * 1000.0
+            previous_ema = float(stream_state.get("ema_fps", 0.0))
+            ema_fps = fps if previous_ema <= 0 else (previous_ema * 0.75 + fps * 0.25)
+            summary = (
+                f"{summary}\n"
+                f"- **Stream FPS:** `{ema_fps:.1f}`\n"
+                f"- **End-to-end:** `{latency_ms:.1f}ms`\n"
+                f"- **Frame Size:** `{int(stream_max_side)}px max side`\n"
+                f"- **Processed / Skipped:** `{processed_frames}` / `{skipped_frames}`"
+            )
             stream_state = {
-                "last_time": now,
-                "last_output": out_img,
+                "frame_index": frame_index,
+                "processed_frames": processed_frames,
+                "skipped_frames": skipped_frames,
+                "last_time": process_end,
                 "last_summary": summary,
+                "ema_fps": ema_fps,
             }
         return out_img, summary, stream_state
 
@@ -624,8 +670,15 @@ class YOLO_Master_WebUI:
                             cpu_chk = gr.Checkbox(True, label="Force CPU")
 
                     with gr.Accordion("🎞️ Live Stream Performance", open=False):
+                        stream_preset = gr.Radio(
+                            choices=list(GlobalConfig.STREAM_PRESETS.keys()),
+                            value="Balanced",
+                            label="Stream Preset"
+                        )
                         stream_max_side = gr.Slider(320, 960, 640, step=32, label="Stream Max Side (px)")
                         min_frame_interval = gr.Slider(0, 1, 0.15, step=0.05, label="Min Frame Interval (s)")
+                        stream_frame_stride = gr.Slider(1, 6, 2, step=1, label="Process Every Nth Frame")
+                        stream_max_det = gr.Slider(20, 300, 120, step=10, label="Stream Max Objects")
 
                     # Output Options
                     options_chk = gr.CheckboxGroup(
@@ -690,6 +743,12 @@ class YOLO_Master_WebUI:
             task_radio.change(fn=self.update_model_dropdown, inputs=task_radio, outputs=model_dd)
             refresh_btn.click(fn=self.refresh_models, inputs=task_radio, outputs=model_dd)
             validate_btn.click(fn=self.describe_model, inputs=[task_radio, custom_model_txt], outputs=info_md)
+            stream_preset.change(
+                fn=self.update_stream_preset,
+                inputs=stream_preset,
+                outputs=[stream_max_side, min_frame_interval, stream_frame_stride, stream_max_det],
+                show_api=False
+            )
             
             # 2. Inference Logic
             run_btn.click(
@@ -709,8 +768,8 @@ class YOLO_Master_WebUI:
                 inputs=[
                     task_radio, webcam_img, model_dd, custom_model_txt,
                     conf_slider, iou_slider, device_txt,
-                    max_det_num, line_width_num, cpu_chk, options_chk,
-                    stream_max_side, min_frame_interval, stream_state
+                    line_width_num, cpu_chk, options_chk,
+                    stream_max_side, min_frame_interval, stream_frame_stride, stream_max_det, stream_state
                 ],
                 outputs=[webcam_out_img, webcam_info_md, stream_state],
                 show_progress="hidden",
