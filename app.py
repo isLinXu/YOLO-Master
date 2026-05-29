@@ -1,5 +1,6 @@
 import os
 import gc
+import time
 import warnings
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple, Any
@@ -23,6 +24,7 @@ class GlobalConfig:
     """Global configuration parameters for easy modification."""
     PROJECT_URL = "https://github.com/Tencent/YOLO-Master"
     MASCOT_IMAGE_URL = "https://github.com/user-attachments/assets/bbf751ea-af27-465d-a8a9-7822db343638"
+    STREAM_DISABLED_OPTIONS = {"half", "show", "save", "save_txt", "save_crop"}
     # Default model files mapping
     DEFAULT_MODELS = {
         "detect": "ckpts/yolo-master-v0.1-n.pt",
@@ -340,6 +342,18 @@ class YOLO_Master_WebUI:
             return None
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+    @staticmethod
+    def resize_for_stream(image: np.ndarray, max_side: float) -> np.ndarray:
+        if image is None or max_side is None or max_side <= 0:
+            return image
+        h, w = image.shape[:2]
+        longest_side = max(h, w)
+        if longest_side <= max_side:
+            return image
+        scale = float(max_side) / float(longest_side)
+        new_size = (max(1, int(w * scale)), max(1, int(h * scale)))
+        return cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
+
     def inference(self, 
                   task: str, 
                   image: np.ndarray, 
@@ -351,7 +365,9 @@ class YOLO_Master_WebUI:
                   max_det: float, 
                   line_width: float, 
                   cpu: bool,
-                  checkboxes: List[str]):
+                  checkboxes: List[str],
+                  stream_mode: bool = False,
+                  stream_max_side: Optional[float] = None):
         """
         Core inference function.
         Returns: (Annotated Image, Results DataFrame, Summary Text)
@@ -363,7 +379,12 @@ class YOLO_Master_WebUI:
         device_opt = "cpu" if cpu else (device if device else "")
         line_width_opt = int(line_width) if line_width > 0 else None
         max_det_opt = int(max_det)
-        options = {k: True for k in checkboxes}
+        enabled_options = set(checkboxes or [])
+        if stream_mode:
+            enabled_options -= GlobalConfig.STREAM_DISABLED_OPTIONS
+        options = {k: True for k in enabled_options}
+        if stream_mode and stream_max_side:
+            options["imgsz"] = int(stream_max_side)
         
         # Optimization for segmentation task
         if task == "seg" and "retina_masks" not in options:
@@ -381,6 +402,8 @@ class YOLO_Master_WebUI:
         try:
             # Gradio input is RGB, but Ultralytics expects BGR for numpy arrays
             # We convert to BGR to ensure correct inference and plotting colors
+            if stream_mode:
+                image = self.resize_for_stream(image, stream_max_side or 0)
             image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             
             results = model(image_bgr, 
@@ -424,15 +447,16 @@ class YOLO_Master_WebUI:
                 except Exception:
                     pass
         
-        df = pd.DataFrame(data_list)
+        df = None if stream_mode else pd.DataFrame(data_list)
         
         # 4.3 Summary Info
         speed = res.speed
         infer_time = speed.get('inference', 0.0)
         model_device = self.model_manager.get_current_model_info()
         
+        title = "Live Stream Frame" if stream_mode else "Inference Done"
         summary = (
-            f"### ✅ Inference Done\n"
+            f"### ✅ {title}\n"
             f"- **Model:** `{Path(self.model_manager.current_model_path).name}`\n"
             f"- **Time:** `{infer_time:.1f}ms`\n"
             f"- **Objects:** {len(data_list)}\n"
@@ -454,10 +478,26 @@ class YOLO_Master_WebUI:
         line_width: float,
         cpu: bool,
         checkboxes: List[str],
+        stream_max_side: float,
+        min_frame_interval: float,
+        stream_state: Optional[Dict[str, Any]],
     ):
         """Run inference for a webcam frame without refreshing the detections table."""
+        stream_state = stream_state or {}
         if frame is None:
-            return None, "Waiting for webcam stream..."
+            return None, "Waiting for webcam stream...", stream_state
+
+        now = time.monotonic()
+        last_time = float(stream_state.get("last_time", 0.0))
+        last_output = stream_state.get("last_output")
+        last_summary = stream_state.get("last_summary")
+        if (
+            min_frame_interval
+            and last_output is not None
+            and last_summary is not None
+            and now - last_time < float(min_frame_interval)
+        ):
+            return last_output, last_summary, stream_state
 
         out_img, _df, summary = self.inference(
             task,
@@ -471,8 +511,16 @@ class YOLO_Master_WebUI:
             line_width,
             cpu,
             checkboxes,
+            stream_mode=True,
+            stream_max_side=stream_max_side,
         )
-        return out_img, summary
+        if out_img is not None:
+            stream_state = {
+                "last_time": now,
+                "last_output": out_img,
+                "last_summary": summary,
+            }
+        return out_img, summary, stream_state
 
     def describe_model(self, task: str, model_path: str) -> str:
         """Validate and describe the model."""
@@ -575,6 +623,10 @@ class YOLO_Master_WebUI:
                             device_txt = gr.Textbox("cpu", label="Device ID (e.g. 0, cpu)", placeholder="0 or cpu")
                             cpu_chk = gr.Checkbox(True, label="Force CPU")
 
+                    with gr.Accordion("🎞️ Live Stream Performance", open=False):
+                        stream_max_side = gr.Slider(320, 960, 640, step=32, label="Stream Max Side (px)")
+                        min_frame_interval = gr.Slider(0, 1, 0.15, step=0.05, label="Min Frame Interval (s)")
+
                     # Output Options
                     options_chk = gr.CheckboxGroup(
                         ["half", "show", "save", "save_txt", "save_crop", "hide_labels", "hide_conf", "agnostic_nms", "retina_masks"],
@@ -623,6 +675,7 @@ class YOLO_Master_WebUI:
                                             interactive=False
                                         )
                                     webcam_info_md = gr.Markdown(value="Waiting for webcam stream...")
+                                    stream_state = gr.State({})
 
                         with gr.TabItem("📊 Data Analysis"):
                             gr.Markdown("### Detections Data")
@@ -656,9 +709,10 @@ class YOLO_Master_WebUI:
                 inputs=[
                     task_radio, webcam_img, model_dd, custom_model_txt,
                     conf_slider, iou_slider, device_txt,
-                    max_det_num, line_width_num, cpu_chk, options_chk
+                    max_det_num, line_width_num, cpu_chk, options_chk,
+                    stream_max_side, min_frame_interval, stream_state
                 ],
-                outputs=[webcam_out_img, webcam_info_md],
+                outputs=[webcam_out_img, webcam_info_md, stream_state],
                 show_progress="hidden",
                 trigger_mode="always_last",
                 concurrency_limit=1,
