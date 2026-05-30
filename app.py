@@ -65,6 +65,15 @@ class GlobalConfig:
             "vlm_model": "qwen-vl-max",
             "llm_model": "",
         },
+        "Hugging Face": {
+            "provider": "huggingface",
+            "api_key_env": "HF_TOKEN",
+            "alt_api_key_envs": ["HUGGINGFACEHUB_API_TOKEN", "HF_API_TOKEN"],
+            "base_url": "https://router.huggingface.co/v1",
+            "api_mode": "chat.completions",
+            "vlm_model": "zai-org/GLM-4.5V:fastest",
+            "llm_model": "openai/gpt-oss-120b:fastest",
+        },
         "Custom": {
             "provider": "custom",
             "api_key_env": "OPENAI_API_KEY",
@@ -1083,16 +1092,21 @@ class YOLO_Master_WebUI:
     ) -> Dict[str, Any]:
         defaults = self.api_provider_defaults(provider)
         key_env = defaults.get("api_key_env", "OPENAI_API_KEY")
+        alt_key_envs = [str(env) for env in defaults.get("alt_api_key_envs", [])]
         api_key = (api_key_input or "").strip() or os.environ.get(key_env)
-        if key_env != "OPENAI_API_KEY":
+        for alt_env in alt_key_envs:
+            api_key = api_key or os.environ.get(alt_env)
+        if key_env != "OPENAI_API_KEY" and "OPENAI_API_KEY" not in alt_key_envs:
             api_key = api_key or os.environ.get("OPENAI_API_KEY")
         if not api_key:
+            key_names = [key_env] + alt_key_envs
             return {
                 "status": "blocked",
                 "provider": defaults.get("provider", provider.lower()),
                 "api_mode": api_mode,
-                "summary": f"{key_env} is not set; API reasoning was skipped.",
+                "summary": f"{' / '.join(key_names)} is not set; API reasoning was skipped.",
                 "api_key_env": key_env,
+                "api_key_envs": key_names,
             }
 
         resolved_base = (base_url or defaults["base_url"]).rstrip("/")
@@ -1855,7 +1869,7 @@ class YOLO_Master_WebUI:
                         )
                         agent_api_key = gr.Textbox(
                             value="",
-                            label="API Key",
+                            label="API Key (optional if set in Secrets)",
                             type="password",
                             interactive=True
                         )
