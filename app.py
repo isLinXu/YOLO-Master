@@ -31,6 +31,7 @@ class GlobalConfig:
     PROJECT_URL = "https://github.com/Tencent/YOLO-Master"
     MASCOT_IMAGE_URL = "https://github.com/user-attachments/assets/bbf751ea-af27-465d-a8a9-7822db343638"
     STREAM_DISABLED_OPTIONS = {"half", "show", "save", "save_txt", "save_crop"}
+    AGENT_DISABLED_OPTIONS = {"half", "show", "save", "save_txt", "save_crop", "hide_labels", "hide_conf"}
     STREAM_PRESETS = {
         "Realtime": {"max_side": 416, "interval": 0.06, "stride": 2, "max_det": 60},
         "Fast": {"max_side": 480, "interval": 0.10, "stride": 3, "max_det": 80},
@@ -604,6 +605,27 @@ class YOLO_Master_WebUI:
         return str(value)
 
     @staticmethod
+    def listify_report_value(value: Any) -> List[Any]:
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return value
+        if isinstance(value, tuple):
+            return list(value)
+        return [value]
+
+    def report_value_text(self, value: Any) -> str:
+        if isinstance(value, (dict, list, tuple)):
+            return json.dumps(self.json_safe(value), ensure_ascii=False)
+        return str(value)
+
+    @staticmethod
+    def caption_text(value: Any) -> str:
+        if isinstance(value, dict):
+            return str(value.get("short") or value.get("dense") or "")
+        return str(value or "")
+
+    @staticmethod
     def extract_json_object(text: str) -> Optional[Dict[str, Any]]:
         if not text:
             return None
@@ -1152,19 +1174,19 @@ class YOLO_Master_WebUI:
             else:
                 report += [
                     "**Agent Answer**",
-                    str(verdict.get("answer") or verdict.get("caption", {}).get("short") or "API returned a structured verdict."),
+                    str(verdict.get("answer") or self.caption_text(verdict.get("caption")) or "API returned a structured verdict."),
                     "",
                     "**Visual Evidence**",
                 ]
-                for item in verdict.get("visual_evidence", [])[:8]:
-                    report.append(f"- {item}")
+                for item in self.listify_report_value(verdict.get("visual_evidence"))[:8]:
+                    report.append(f"- {self.report_value_text(item)}")
                 yolo_cross_check = verdict.get("yolo_cross_check")
                 if yolo_cross_check:
                     report += ["", "**YOLO Cross-check**", f"```json\n{json.dumps(self.json_safe(yolo_cross_check), ensure_ascii=False, indent=2)}\n```"]
-                next_actions = verdict.get("recommended_next_actions", [])
+                next_actions = self.listify_report_value(verdict.get("recommended_next_actions"))
                 if next_actions:
                     report += ["", "**Recommended Next Actions**"]
-                    report += [f"- {item}" for item in next_actions[:8]]
+                    report += [f"- {self.report_value_text(item)}" for item in next_actions[:8]]
         elif api_result.get("status") == "ok":
             report += ["**API Report**", str(api_result.get("text") or "API returned no text.")]
         elif api_result.get("status") == "blocked":
@@ -1348,7 +1370,9 @@ class YOLO_Master_WebUI:
 
         device_opt = "cpu" if cpu else (device if device else "")
         line_width_opt = int(line_width) if line_width and line_width > 0 else None
-        enabled_options = set(checkboxes or [])
+        selected_options = set(checkboxes or [])
+        enabled_options = selected_options - GlobalConfig.AGENT_DISABLED_OPTIONS
+        disabled_options = sorted(selected_options - enabled_options)
         options = {k: True for k in enabled_options}
         options["verbose"] = False
         if task == "seg" and "retina_masks" not in options:
@@ -1414,6 +1438,7 @@ class YOLO_Master_WebUI:
                 "enable_llm_refine": bool(enable_llm_refine),
                 "max_output_tokens": int(max_output_tokens),
                 "temperature": float(temperature),
+                "disabled_output_options": disabled_options,
             },
             "policy": {"dry_run": False},
         }
@@ -1475,6 +1500,8 @@ class YOLO_Master_WebUI:
             f"- **Evidence boxes:** `{evidence.get('counts', {}).get('boxes', 0)}`\n"
             f"- **Masks:** `{evidence.get('counts', {}).get('masks', 0)}`"
         )
+        if disabled_options:
+            summary += f"\n- **Report-safe options disabled:** `{', '.join(disabled_options)}`"
         return report_image, report_md, envelope, annotated, report_df, summary
 
     def run_stream_inference(
