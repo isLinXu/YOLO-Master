@@ -1785,9 +1785,9 @@ class YOLO_Master_WebUI:
                             model_dd = gr.Dropdown(
                                 choices=self.model_map["detect"],
                                 value=self.model_map["detect"][0] if self.model_map["detect"] else None,
-                                label="Model", scale=5, interactive=True
+                                label="Model", interactive=True
                             )
-                            refresh_btn = gr.Button("🔄", scale=1, min_width=10, )
+                            refresh_btn = gr.Button("🔄", )
                         custom_model_txt = gr.Textbox(
                             value="", label="Custom Model Path",
                             placeholder="./ckpts/yolo_master_n.pt"
@@ -1900,9 +1900,9 @@ class YOLO_Master_WebUI:
                                     with gr.Row():
                                         chat_input = gr.Textbox(
                                             label="Message", placeholder="Ask the Agent...",
-                                            scale=5, show_label=False
+                                            show_label=False
                                         )
-                                        chat_send = gr.Button("➤ Send", scale=1, variant="primary")
+                                        chat_send = gr.Button("➤ Send", variant="primary")
                                     with gr.Row():
                                         gr.Button("Quick: Detect objects", variant="secondary").click(
                                             lambda: "detect objects in this image", outputs=chat_input
