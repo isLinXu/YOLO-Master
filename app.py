@@ -1840,7 +1840,7 @@ class YOLO_Master_WebUI:
                                     info_md = gr.Markdown("Waiting...", elem_classes=["status-bar"])
                                 with gr.Column(scale=1):
                                     out_df = gr.Dataframe(
-                                        column_names=["Class ID", "Class Name", "Confidence", "x1", "y1", "x2", "y2"],
+                                        headers=["Class ID", "Class Name", "Confidence", "x1", "y1", "x2", "y2"],
                                         label="Detections", interactive=False
                                     )
                             # Agent Insights 面板
