@@ -1169,6 +1169,16 @@ class YOLO_Master_WebUI:
         )
         return str(out), report, LOGGER.get_text()
 
+    # ---------- 📷 Webcam (Capture Mode) ----------
+    def webcam_infer(self, task, image, model_dropdown, custom_path, conf, iou, device, max_det, line_width, cpu, checkboxes):
+        """Simplified webcam inference for Gradio 4.x capture mode."""
+        if image is None:
+            return None, "⚠️ Click Capture to take a photo.", LOGGER.get_text()
+        res_rgb, df, _, _, summary, _, logs = self._do_inference(
+            image, task, model_dropdown, custom_path, conf, iou, device, max_det, line_width, cpu, checkboxes
+        )
+        return res_rgb, summary, logs
+
     # ---------- UI 构建 ----------
     def brand_header(self) -> str:
         return f"""
@@ -1860,32 +1870,23 @@ class YOLO_Master_WebUI:
                                 video_out = gr.Video(label="Output Video", interactive=False)
                                 video_report = gr.Markdown(elem_classes=["status-bar"])
 
-                        # --- Tab 4: Webcam (Streaming) ---
+                        # --- Tab 4: Webcam (Capture Mode) ---
                         with gr.TabItem("📷 Webcam"):
-                            gr.Markdown("### Live Camera Inference")
+                            gr.Markdown("### 📸 Camera Capture\nClick **Capture** to take a photo and run inference.")
                             with gr.Row():
                                 with gr.Column(scale=1):
-                                    stream_preset = gr.Dropdown(
-                                        choices=list(CONFIG.STREAM_PRESETS.keys()),
-                                        value="Balanced", label="Stream Preset"
+                                    webcam_in = gr.Image(
+                                        sources=["webcam"], label="Camera", height=480
                                     )
-                                    stream_max_side = gr.Number(640, label="Max Side (px)", precision=0)
-                                    stream_max_det = gr.Number(120, label="Max Detections", precision=0)
-                                    stream_interval = gr.Number(0.15, label="Min Frame Interval (s)", step=0.01)
-                                    stream_stride = gr.Number(2, label="Frame Stride", precision=0)
-                                    with gr.Row():
-                                        auto_throttle = gr.Checkbox(True, label="Auto Throttle")
-                                        smooth_preview = gr.Checkbox(True, label="Smooth Preview")
-                                        smooth_boxes = gr.Checkbox(True, label="Smooth Boxes")
-                                    reset_stream_btn = gr.Button("🔄 Reset Stream", variant="secondary", size="sm")
-                                with gr.Column(scale=2):
-                                    webcam_stream = gr.Image(
-                                        sources=["webcam"], streaming=True, label="Live Feed", height=480
+                                    run_webcam_btn = gr.Button("📸 Capture & Infer", variant="primary", size="lg")
+                                with gr.Column(scale=1):
+                                    webcam_out = gr.Image(
+                                        label="Result", height=480, interactive=False,
+                                        elem_classes=["output-image"]
                                     )
-                                    stream_summary = gr.Markdown(
-                                        "Waiting for stream...", elem_classes=["status-bar"]
+                                    webcam_info = gr.Markdown(
+                                        "Click Capture to start.", elem_classes=["status-bar"]
                                     )
-                            stream_state = gr.State({})  # Hidden stream state
 
                         # --- Tab 5: 🤖 Agent ---
                         with gr.TabItem("🤖 Agent"):
@@ -2018,22 +2019,12 @@ class YOLO_Master_WebUI:
                 outputs=[video_out, video_report, log_box]
             )
 
-            # 🎥 Streaming (Webcam)
-            stream_preset.change(
-                fn=self.update_stream_preset, inputs=stream_preset,
-                outputs=[stream_max_side, stream_interval, stream_stride, stream_max_det]
-            )
-            webcam_stream.stream(
-                fn=self.inference_stream,
-                inputs=[task_radio, webcam_stream, model_dd, custom_model_txt,
-                        conf_slider, iou_slider, device_txt, line_width_num, cpu_chk, options_chk,
-                        stream_max_side, stream_interval, stream_stride, stream_max_det,
-                        smooth_preview, smooth_boxes, auto_throttle, stream_state],
-                outputs=[webcam_stream, stream_summary, stream_state],
-                show_progress=False,
-            )
-            reset_stream_btn.click(
-                fn=self.reset_stream_state, outputs=[webcam_stream, stream_summary, stream_state]
+            # 🎥 Webcam (Capture Mode)
+            run_webcam_btn.click(
+                fn=self.webcam_infer,
+                inputs=[task_radio, webcam_in, model_dd, custom_model_txt,
+                        conf_slider, iou_slider, device_txt, max_det_num, line_width_num, cpu_chk, options_chk],
+                outputs=[webcam_out, webcam_info, log_box],
             )
 
             # History / Logs
