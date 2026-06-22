@@ -1880,7 +1880,7 @@ class YOLO_Master_WebUI:
                                     reset_stream_btn = gr.Button("🔄 Reset Stream", variant="secondary", size="sm")
                                 with gr.Column(scale=2):
                                     webcam_stream = gr.Image(
-                                        source="webcam", streaming=True, label="Live Feed", height=480
+                                        sources=["webcam"], streaming=True, label="Live Feed", height=480
                                     )
                                     stream_summary = gr.Markdown(
                                         "Waiting for stream...", elem_classes=["status-bar"]
