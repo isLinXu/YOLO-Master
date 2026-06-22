@@ -1787,13 +1787,13 @@ class YOLO_Master_WebUI:
                                 value=self.model_map["detect"][0] if self.model_map["detect"] else None,
                                 label="Model", scale=5, interactive=True
                             )
-                            refresh_btn = gr.Button("🔄", scale=1, min_width=10, size="sm")
+                            refresh_btn = gr.Button("🔄", scale=1, min_width=10, )
                         custom_model_txt = gr.Textbox(
                             value="", label="Custom Model Path",
                             placeholder="./ckpts/yolo_master_n.pt"
                         )
-                        validate_btn = gr.Button("✅ Validate", size="sm", variant="secondary")
-                        model_info_btn = gr.Button("📋 Info", size="sm", variant="secondary")
+                        validate_btn = gr.Button("✅ Validate", variant="secondary")
+                        model_info_btn = gr.Button("📋 Info", variant="secondary")
 
                     with gr.Group(elem_classes=["panel"]):
                         gr.Markdown("### ⚙️ Parameters")
@@ -1817,9 +1817,9 @@ class YOLO_Master_WebUI:
 
                     with gr.Group(elem_classes=["panel"]):
                         gr.Markdown("### 🛠 Maintenance")
-                        clear_log_btn = gr.Button("🧹 Clear Logs", size="sm", variant="secondary")
-                        clear_hist_btn = gr.Button("🗑 Clear History", size="sm", variant="secondary")
-                        recommend_btn = gr.Button("🧠 Recommend Params", size="sm", variant="secondary")
+                        clear_log_btn = gr.Button("🧹 Clear Logs", variant="secondary")
+                        clear_hist_btn = gr.Button("🗑 Clear History", variant="secondary")
+                        recommend_btn = gr.Button("🧠 Recommend Params", variant="secondary")
 
                 # ---- Main Tabs ----
                 with gr.Column(scale=3):
@@ -1904,16 +1904,16 @@ class YOLO_Master_WebUI:
                                         )
                                         chat_send = gr.Button("➤ Send", scale=1, variant="primary")
                                     with gr.Row():
-                                        gr.Button("Quick: Detect objects", size="sm", variant="secondary").click(
+                                        gr.Button("Quick: Detect objects", variant="secondary").click(
                                             lambda: "detect objects in this image", outputs=chat_input
                                         )
-                                        gr.Button("Quick: Analyze result", size="sm", variant="secondary").click(
+                                        gr.Button("Quick: Analyze result", variant="secondary").click(
                                             lambda: "analyze the last result", outputs=chat_input
                                         )
-                                        gr.Button("Quick: Recommend params", size="sm", variant="secondary").click(
+                                        gr.Button("Quick: Recommend params", variant="secondary").click(
                                             lambda: "recommend parameters for this image", outputs=chat_input
                                         )
-                                        gr.Button("Clear Chat", size="sm", variant="secondary").click(
+                                        gr.Button("Clear Chat", variant="secondary").click(
                                             lambda: None, outputs=chatbot
                                         )
                                 with gr.Column(scale=1):
@@ -1929,14 +1929,14 @@ class YOLO_Master_WebUI:
                         # --- Tab 6: History ---
                         with gr.Tab("🕘 History"):
                             history_df = gr.Dataframe(label="Inference History", interactive=False)
-                            refresh_hist_btn = gr.Button("🔄 Refresh", size="sm")
+                            refresh_hist_btn = gr.Button("🔄 Refresh", )
                             hist_detail = gr.Markdown()
 
                         # --- Tab 7: Logs ---
                         with gr.Tab("📜 Logs"):
                             log_box = gr.Textbox(label="Runtime Logs", lines=20, interactive=False,
                                                 value=LOGGER.get_text(), elem_classes=["log-box"])
-                            refresh_log_btn = gr.Button("🔄 Refresh", size="sm")
+                            refresh_log_btn = gr.Button("🔄 Refresh", )
 
                         # --- Tab 8: About ---
                         with gr.Tab("ℹ️ About"):
