@@ -1801,8 +1801,8 @@ class YOLO_Master_WebUI:
                             conf_slider = gr.Slider(0, 1, 0.25, step=0.01, label="Confidence")
                             iou_slider = gr.Slider(0, 1, 0.7, step=0.01, label="IoU")
                             with gr.Row():
-                                max_det_num = gr.Number(300, label="Max Objects", precision=0)
-                                line_width_num = gr.Number(0, label="Line Width", precision=0)
+                                max_det_num = gr.Number(300, label="Max Objects")
+                                line_width_num = gr.Number(0, label="Line Width")
                             with gr.Row():
                                 device_txt = gr.Textbox("cpu", label="Device", placeholder="0 or cpu")
                                 cpu_chk = gr.Checkbox(True, label="Force CPU")
@@ -1825,22 +1825,22 @@ class YOLO_Master_WebUI:
                 with gr.Column(scale=3):
                     with gr.Tabs():
                         # --- Tab 1: Single Image (Agent Enhanced) ---
-                        with gr.TabItem("🖼️ Single Image"):
+                        with gr.Tab("🖼️ Single Image"):
                             with gr.Row():
-                                inp_img = gr.Image(type="numpy", label="Input", height=420,
+                                inp_img = gr.Image(type="numpy", label="Input",
                                                    value=self.load_default_image(), elem_classes=["input-image"])
-                                out_img = gr.Image(type="numpy", label="Output", height=420,
+                                out_img = gr.Image(type="numpy", label="Output",
                                                    interactive=False, elem_classes=["output-image"])
                             with gr.Row():
-                                run_btn = gr.Button("🔥 Run Inference", variant="primary", size="lg")
-                                smart_btn = gr.Button("🧠 Smart Infer", variant="primary", size="lg")
-                                enhance_btn = gr.Button("🔁 Auto-Enhance", variant="secondary", size="lg")
+                                run_btn = gr.Button("🔥 Run Inference", variant="primary")
+                                smart_btn = gr.Button("🧠 Smart Infer", variant="primary")
+                                enhance_btn = gr.Button("🔁 Auto-Enhance", variant="secondary")
                             with gr.Row():
                                 with gr.Column(scale=2):
                                     info_md = gr.Markdown("Waiting...", elem_classes=["status-bar"])
                                 with gr.Column(scale=1):
                                     out_df = gr.Dataframe(
-                                        headers=["Class ID", "Class Name", "Confidence", "x1", "y1", "x2", "y2"],
+                                        column_names=["Class ID", "Class Name", "Confidence", "x1", "y1", "x2", "y2"],
                                         label="Detections", interactive=False
                                     )
                             # Agent Insights 面板
@@ -1855,7 +1855,7 @@ class YOLO_Master_WebUI:
                             timing_img = gr.Image(label="Latency Trend", interactive=False)
 
                         # --- Tab 2: Batch ---
-                        with gr.TabItem("📦 Batch"):
+                        with gr.Tab("📦 Batch"):
                             batch_files = gr.Files(file_types=["image"], label="Upload Images", file_count="multiple")
                             run_batch_btn = gr.Button("🔥 Run Batch", variant="primary")
                             with gr.Row():
@@ -1863,7 +1863,7 @@ class YOLO_Master_WebUI:
                                 batch_report = gr.Markdown(elem_classes=["status-bar"])
 
                         # --- Tab 3: Video ---
-                        with gr.TabItem("🎬 Video"):
+                        with gr.Tab("🎬 Video"):
                             video_in = gr.Video(label="Upload Video")
                             run_video_btn = gr.Button("🔥 Process Video", variant="primary")
                             with gr.Row():
@@ -1871,17 +1871,17 @@ class YOLO_Master_WebUI:
                                 video_report = gr.Markdown(elem_classes=["status-bar"])
 
                         # --- Tab 4: Webcam (Capture Mode) ---
-                        with gr.TabItem("📷 Webcam"):
+                        with gr.Tab("📷 Webcam"):
                             gr.Markdown("### 📸 Camera Capture\nClick **Capture** to take a photo and run inference.")
                             with gr.Row():
                                 with gr.Column(scale=1):
                                     webcam_in = gr.Image(
-                                        sources=["webcam"], label="Camera", height=480
+                                        sources=["webcam"], label="Camera"
                                     )
-                                    run_webcam_btn = gr.Button("📸 Capture & Infer", variant="primary", size="lg")
+                                    run_webcam_btn = gr.Button("📸 Capture & Infer", variant="primary")
                                 with gr.Column(scale=1):
                                     webcam_out = gr.Image(
-                                        label="Result", height=480, interactive=False,
+                                        label="Result", interactive=False,
                                         elem_classes=["output-image"]
                                     )
                                     webcam_info = gr.Markdown(
@@ -1889,7 +1889,7 @@ class YOLO_Master_WebUI:
                                     )
 
                         # --- Tab 5: 🤖 Agent ---
-                        with gr.TabItem("🤖 Agent"):
+                        with gr.Tab("🤖 Agent"):
                             gr.Markdown(
                                 "### 💬 Agent Chat\n"
                                 "Talk to the Agent naturally. Try: *'detect people with conf 0.3'*, *'analyze the last result'*, *'why so few detections?'*"
@@ -1927,19 +1927,19 @@ class YOLO_Master_WebUI:
                                     )
 
                         # --- Tab 6: History ---
-                        with gr.TabItem("🕘 History"):
+                        with gr.Tab("🕘 History"):
                             history_df = gr.Dataframe(label="Inference History", interactive=False)
                             refresh_hist_btn = gr.Button("🔄 Refresh", size="sm")
                             hist_detail = gr.Markdown()
 
                         # --- Tab 7: Logs ---
-                        with gr.TabItem("📜 Logs"):
+                        with gr.Tab("📜 Logs"):
                             log_box = gr.Textbox(label="Runtime Logs", lines=20, interactive=False,
                                                 value=LOGGER.get_text(), elem_classes=["log-box"])
                             refresh_log_btn = gr.Button("🔄 Refresh", size="sm")
 
                         # --- Tab 8: About ---
-                        with gr.TabItem("ℹ️ About"):
+                        with gr.Tab("ℹ️ About"):
                             gr.Markdown(
                                 "### YOLO-Master Studio | Agent Edition\n"
                                 "AI-powered real-time object detection with embedded Agent intelligence.\n\n"
