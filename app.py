@@ -2033,7 +2033,7 @@ class YOLO_Master_WebUI:
             refresh_log_btn.click(fn=lambda: LOGGER.get_text(), outputs=log_box)
             clear_log_btn.click(fn=self.clear_logs, outputs=log_box)
 
-        app.launch(share=True, server_name="0.0.0.0")
+        app.launch(share=True, server_name="0.0.0.0", show_api=False)
 
 
 # ============================================================
